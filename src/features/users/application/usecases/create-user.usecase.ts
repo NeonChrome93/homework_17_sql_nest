@@ -6,38 +6,36 @@ import { UserDbModel } from '../../domain/db-model';
 import { UserRepository } from '../../repositories/user-repository';
 
 export class CreateUserCommand {
-  constructor(public userCreateModel: UserCreateModelDto) {}
+    constructor(public userCreateModel: UserCreateModelDto) {}
 }
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
-  constructor(private readonly usersRepository: UserRepository) {}
+    constructor(private readonly usersRepository: UserRepository) {}
 
-  async execute(command: CreateUserCommand): Promise<UserViewModel> {
-    const passwordSalt = await bcrypt.genSalt(10);
-    //  const passwordHash = await this.generateHash(userCreateModel.password, passwordSalt)
-    const passwordHash = await bcrypt.hash(
-      command.userCreateModel.password,
-      passwordSalt,
-    );
+    async execute(command: CreateUserCommand): Promise<UserViewModel> {
+        const passwordSalt = await bcrypt.genSalt(10);
+        //  const passwordHash = await this.generateHash(userCreateModel.password, passwordSalt)
+        const passwordHash = await bcrypt.hash(command.userCreateModel.password, passwordSalt);
 
-    const newUser: UserDbModel = {
-      login: command.userCreateModel.login,
-      email: command.userCreateModel.email,
-      passwordHash: passwordHash,
-      passwordSalt: passwordSalt,
-      createdAt: new Date(),
-      confirmationCode: '123',
-      isConfirmed: true,
-      passwordRecoveryCode: null,
-      expirationDateOfRecoveryCode: null,
-    };
+        const newUser: UserDbModel = {
+            login: command.userCreateModel.login,
+            email: command.userCreateModel.email,
+            passwordHash: passwordHash,
+            passwordSalt: passwordSalt,
+            createdAt: new Date(),
+            confirmationCode: '123',
+            isConfirmed: true,
+            passwordRecoveryCode: null,
+            expirationDateOfRecoveryCode: null,
+        };
 
-    await this.usersRepository.createUser(newUser);
-    return {
-      login: newUser.login,
-      email: newUser.email,
-      createdAt: newUser.createdAt.toISOString(),
-    };
-  }
+        const createdUserId = await this.usersRepository.createUser(newUser);
+        return {
+            id: createdUserId,
+            login: newUser.login,
+            email: newUser.email,
+            createdAt: newUser.createdAt.toISOString(),
+        };
+    }
 }
