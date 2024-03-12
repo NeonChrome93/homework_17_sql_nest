@@ -30,21 +30,28 @@ export class UserRepository {
     }
 
     async deleteUser(userId: string) {
-        //const findUserById: UserDbModel | null =
-        //   await this.usersQueryRepository.findUserById(userId);
-        // if (!findUserById) return false;
-
-        const query = `
-		DELETE FROM public."Users"
-			WHERE "id" = $1
-	`;
+        const query = `DELETE FROM public."users"
+			  WHERE "id" = $1`;
         const deleted = await this.dataSource.query(query, [userId]);
         if (!deleted) return false;
         return true;
     }
 
     async readUserById(id: string): Promise<User | null> {
-        return null;
+        const result: User | null = await this.dataSource.query(
+            `
+        SELECT  *
+        FROM public.users
+        WHERE "id" = $1;
+`,
+            [id],
+        );
+        return result[0];
+    }
+
+    async saveUser(newUser: User) {
+        const user = newUser;
+        return user;
     }
 
     async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
@@ -52,10 +59,23 @@ export class UserRepository {
     }
 
     async findUserByRecoveryCode(recoveryCode: string): Promise<User | null> {
-        return null;
+        const result = await this.dataSource.query(
+            `
+        SELECT  "passwordRecoveryCode"
+        FROM public.users
+        WHERE "passwordRecoveryCode" = $1;
+`,
+            [recoveryCode],
+        );
+        return result[0];
     }
 
-    async confirmEmail(id: string): Promise<void> {
+    async readUserByCode(code: string): Promise<User | null> {
+        // const user: User | null = await this.UserModel.findOne({confirmationCode: code});
+        // if (!user) {
+        //     return null;
+        // }
+        // return user
         return null;
     }
 
@@ -64,6 +84,10 @@ export class UserRepository {
     }
 
     async updateConfirmationCode(id: string, newCode: string): Promise<any> {
+        return null;
+    }
+
+    async confirmEmail(id: string): Promise<void> {
         return null;
     }
 }

@@ -1,14 +1,11 @@
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserCreateModelDto } from '../../../users/api/models/input/user.input.model';
 import { UserViewModel } from '../../../users/api/models/output/user.output.model';
 import bcrypt from 'bcrypt';
-import { User } from '../../../users/domain/user.entity';
-import { ObjectId } from 'mongodb';
 import { randomUUID } from 'crypto';
 import { EmailAdapter } from '../../adapters/email.adapter';
-import { DevicesService } from '../../../devices/application/device.service';
-import { DevicesRepository } from '../../../devices/repositories/device.repository';
-import { UsersRepository } from '../../../users/repositories/user.repository';
+import { UserRepository } from '../../../users/repositories/user-repository';
+import { User } from '../../../users/domain/db-model';
 
 export class RegistrationUserCommand {
     constructor(public userCreateModel: UserCreateModelDto) {}
@@ -18,7 +15,7 @@ export class RegistrationUserCommand {
 export class RegistrationUserUseCase implements ICommandHandler<RegistrationUserCommand> {
     constructor(
         private readonly emailService: EmailAdapter,
-        private readonly usersRepository: UsersRepository,
+        private readonly usersRepository: UserRepository,
     ) {}
 
     async execute(command: RegistrationUserCommand): Promise<UserViewModel | null> {
@@ -27,7 +24,7 @@ export class RegistrationUserUseCase implements ICommandHandler<RegistrationUser
         const passwordHash = await bcrypt.hash(command.userCreateModel.password, passwordSalt);
 
         const newUser: User = {
-            _id: new ObjectId(),
+            id: null,
             login: command.userCreateModel.login, //valitation not copy in database
             email: command.userCreateModel.email, //
             passwordHash: passwordHash,
@@ -51,7 +48,7 @@ export class RegistrationUserUseCase implements ICommandHandler<RegistrationUser
             return null;
         }
         return {
-            id: newUser._id.toString(),
+            id: newUser.id.toString(),
             login: newUser.login,
             email: newUser.email,
             createdAt: newUser.createdAt.toISOString(),

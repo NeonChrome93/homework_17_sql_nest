@@ -18,6 +18,14 @@ export type QueryUserPaginationType = {
   skip: number;
 };
 
+export type PaginationModels<T> = {
+  pagesCount: number,
+  page: number,
+  pageSize: number,
+  totalCount: number,
+  items: T
+}
+
 const pageNum = (pageNumber) => {
   if (pageNumber && !isNaN(parseInt(pageNumber, 10)) && parseInt(pageNumber, 10) > 0) {
     return parseInt(pageNumber, 10);
