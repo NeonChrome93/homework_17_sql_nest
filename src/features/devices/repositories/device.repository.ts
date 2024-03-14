@@ -1,12 +1,19 @@
 import { Device } from '../domain/device.entity';
 import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class DevicesRepository {
-    constructor() {}
+    constructor(private dataSource: DataSource) {}
 
     async createDevice(device: Device): Promise<Device> {
-        return device;
+        const deviceId = await this.dataSource.query(
+            `INSERT INTO public.devices(
+          ip, "deviceId", "userId", title, "lastActiveDate")
+        VALUES (1$, 2$, 3$, 4$, 5$) returning deviceId`,
+            [device.ip, device.deviceId, device.userId, device.title, device.lastActiveDate],
+        );
+        return deviceId[0];
     }
 
     async isDeviceExistByUserIdAndDeviceId(deviceId: string, userId: string): Promise<boolean> {
@@ -31,6 +38,7 @@ export class DevicesRepository {
             console.error('Ошибка при обновлении даты последней активности устройства:', error);
             return false; // вернуть false в случае ошибки
         }
+        //Смотреть оператор NOT
     }
 
     async deleteDeviceExpectCurrent(userId: string, deviceId: string): Promise<boolean> {
@@ -38,6 +46,10 @@ export class DevicesRepository {
     }
 
     async deleteDevicesById(deviceId: string): Promise<boolean> {
-        return false;
+        const query = `DELETE FROM public.devices
+			  WHERE "deviceId" = $1`;
+        const deleted = await this.dataSource.query(query, [deviceId]);
+        if (!deleted) return false;
+        return true;
     }
 }
