@@ -48,7 +48,7 @@ export class RegistrationUserUseCase implements ICommandHandler<RegistrationUser
             return null;
         }
         return {
-            id: newUser.id.toString(),
+            id: newUser.id,
             login: newUser.login,
             email: newUser.email,
             createdAt: newUser.createdAt.toISOString(),

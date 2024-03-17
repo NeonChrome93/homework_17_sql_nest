@@ -12,18 +12,12 @@ import {
     UseGuards,
     Headers,
 } from '@nestjs/common';
-import { BearerAuthGuard } from '../../../infrastructure/guards/user.guard';
-import { User, UserDocument } from '../../users/domain/user.entity';
 import e, { Response } from 'express';
 import { Request } from 'express';
 import { AuthService } from '../application/auth.service';
-import { UsersRepository } from '../../users/repositories/user.repository';
 import { JwtAdapter } from '../adapters/jwt.adapter';
-import { UserAll, UserId } from '../../../infrastructure/decorators/get-user.decorator';
-import { DevicesService } from '../../devices/application/device.service';
-import { DevicesRepository } from '../../devices/repositories/device.repository';
 import { AuthSessionTokenGuard } from '../../../infrastructure/guards/auth-session-token.guard';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { DeviceId } from '../../../infrastructure/decorators/get-device.decorator';
 import { LocalAuthGuard } from '../../../infrastructure/guards/auth-local.guard';
 import { UserCreateModelDto } from '../../users/api/models/input/user.input.model';
@@ -35,15 +29,19 @@ import { NewPasswordSetCommand } from '../application/usecases/new-password-set.
 import { ResendingCodeCommand } from '../application/usecases/resending-code.usecase';
 import { ConfirmEmailCommand } from '../application/usecases/confirm-email.usecase';
 import { AuthLoginCommand } from '../application/usecases/auth-login.usecase';
+import { BearerAuthGuard } from '../../../infrastructure/guards/user.guard';
+import { User } from '../../users/domain/db-model';
+import { UserRepository } from '../../users/repositories/user-repository';
+import { UserAll } from '../../../infrastructure/decorators/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly jwtService: JwtAdapter,
-        private readonly usersRepository: UsersRepository,
-        private readonly devicesService: DevicesService,
-        private readonly devicesRepository: DevicesRepository,
+        private readonly usersRepository: UserRepository,
+        //private readonly devicesService: DevicesService,
+        //private readonly devicesRepository: DevicesRepository,
         private readonly commandBus: CommandBus,
     ) {}
 
@@ -54,12 +52,12 @@ export class AuthController {
         return {
             email: user.email,
             login: user.login,
-            userId: user._id.toString(),
+            userId: user.id.toString(),
         };
     }
 
     @Post('/login') //отдельный юз кейс на каждый запрос
-    @UseGuards(ThrottlerGuard, LocalAuthGuard)
+    @UseGuards(LocalAuthGuard)
     @HttpCode(200)
     //@Throttle({default: {ttl: 10000, limit: 5}})
     async authLogin(
@@ -71,7 +69,7 @@ export class AuthController {
         // const {loginOrEmail, password} = req.body
 
         console.log(title);
-        console.log('loginOrEmail');
+        console.log('User', user);
         const result = await this.commandBus.execute(new AuthLoginCommand(ip, title || 'x', user)); // alt+ enter
         if (!result) return res.sendStatus(401);
         res.cookie('refreshToken', result.refreshToken, {
@@ -110,7 +108,7 @@ export class AuthController {
             const refreshToken = req.cookies.refreshToken;
             //добавить миддлвару на наличие токена
             if (refreshToken) {
-                await this.devicesRepository.deleteDevicesById(deviceId!.toString());
+                //await this.devicesRepository.deleteDevicesById(deviceId!.toString());
                 //достать device из БД и сравнить lastActiveDate из БД и из текущего токена
                 //delete device by deviceId
                 //в чс уже не помещает, выйти с текущего устройства
@@ -125,7 +123,7 @@ export class AuthController {
 
     @Post('/registration')
     //@Throttle({default: {ttl: 10000, limit: 5}})
-    @UseGuards(ThrottlerGuard)
+    //@UseGuards(ThrottlerGuard)
     @HttpCode(204)
     async registrationUser(@Body() dto: UserCreateModelDto) {
         await this.commandBus.execute(
@@ -141,7 +139,7 @@ export class AuthController {
 
     @Post('/registration-confirmation')
     //@Throttle({default: {ttl: 10000, limit: 5}})
-    @UseGuards(ThrottlerGuard)
+    //@UseGuards(ThrottlerGuard)
     @HttpCode(204)
     async confirmRegistration(@Body() codeDto: CodeDto) {
         const isConfirmed = await this.commandBus.execute(new ConfirmEmailCommand(codeDto.code));
@@ -174,7 +172,7 @@ export class AuthController {
     @Post('/registration-email-resending')
     @HttpCode(204)
     //@Throttle({default: {ttl: 10000, limit: 5}})
-    @UseGuards(ThrottlerGuard)
+    //@UseGuards(ThrottlerGuard)
     async receivedCode(@Body() emailDto: EmailDto) {
         const receivedCode = await this.commandBus.execute(new ResendingCodeCommand(emailDto.email));
         if (!receivedCode) {

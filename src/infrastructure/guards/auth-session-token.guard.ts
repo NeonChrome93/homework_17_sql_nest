@@ -1,8 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtAdapter } from '../../features/auth/adapters/jwt.adapter';
 import { UserService } from '../../features/users/application/user.service';
-import { DevicesService } from '../../features/devices/application/device.service';
 import { DevicesRepository } from '../../features/devices/repositories/device.repository';
+import { DevicesService } from '../../features/devices/application/device.service';
+//import { DevicesService } from '../../features/devices/application/device.service';
+//import { DevicesRepository } from '../../features/devices/repositories/device.repository';
 
 @Injectable()
 export class AuthSessionTokenGuard implements CanActivate {
@@ -32,9 +34,12 @@ export class AuthSessionTokenGuard implements CanActivate {
             request.deviceId = payload.deviceId;
         }
 
-        //const existDevice = await this.devicesRepository.isDeviceExistByUserIdAndDeviceId(payload.deviceId, payload.userId)
-        // if (!existDevice) {
-        //}
+        const existDevice = await this.devicesRepository.isDeviceExistByUserIdAndDeviceId(
+            payload.deviceId,
+            payload.userId,
+        );
+        if (!existDevice) {
+        }
 
         const device = await this.devicesService.findDeviceById(payload.deviceId);
         const tokenDate = this.jwtService.lastActiveDate(refreshToken);

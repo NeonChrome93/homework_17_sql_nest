@@ -17,11 +17,12 @@ export class ResendingCodeUseCase implements ICommandHandler<ResendingCodeComman
     //переотправка кода
     async execute(command: ResendingCodeCommand): Promise<boolean> {
         const user = await this.usersRepository.readUserByEmail(command.email);
+        console.log(user);
         if (!user) return false;
         const newCode = randomUUID();
-        await this.usersRepository.updateConfirmationCode(user.id.toString(), newCode);
+        await this.usersRepository.updateConfirmationCode(user.id, newCode);
         try {
-            this.emailService.sendEmail(user.email, newCode, 'It is your code');
+            await this.emailService.sendEmail(user.email, newCode, 'It is your code');
         } catch (e) {
             console.log('code resending email error', e);
         }

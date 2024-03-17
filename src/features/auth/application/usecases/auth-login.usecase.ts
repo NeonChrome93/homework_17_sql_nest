@@ -2,6 +2,7 @@ import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { JwtAdapter } from '../../adapters/jwt.adapter';
 import { User } from '../../../users/domain/db-model';
+import { CreateDeviceCommand } from '../../../devices/application/usecases/create-device.usecase';
 
 export class AuthLoginCommand {
     constructor(
@@ -27,15 +28,15 @@ export class AuthLoginUseCase implements ICommandHandler<AuthLoginCommand> {
         const deviceId = randomUUID();
         const refreshToken = this.jwtService.generateRefreshToken(command.user, deviceId);
         const lastActiveDate = this.jwtService.lastActiveDate(refreshToken); // взять дату выписки этого токена === lastActiveDate у девайся
-        // await this.commandBus.execute(
-        //     new CreateDeviceCommand(
-        //         command.ip,
-        //         deviceId,
-        //         command.user._id.toString(),
-        //         command.title,
-        //         new Date(lastActiveDate),
-        //     ),
-        //);
+        await this.commandBus.execute(
+            new CreateDeviceCommand(
+                command.ip,
+                deviceId,
+                command.user.id.toString(),
+                command.title,
+                new Date(lastActiveDate),
+            ),
+        );
         return {
             accessToken,
             refreshToken,

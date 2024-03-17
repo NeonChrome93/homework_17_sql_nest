@@ -15,7 +15,6 @@ export class RegistrationEmailResendingConstraint implements ValidatorConstraint
 
     async validate(email: string, args: ValidationArguments) {
         const user = await this.usersRepository.readUserByEmail(email);
-        //console.log('User', user);
         if (!user) {
             return false;
         }

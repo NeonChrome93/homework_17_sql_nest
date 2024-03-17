@@ -1,15 +1,18 @@
 import { Controller, Delete, Get, HttpCode, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { JwtAdapter } from '../../auth/adapters/jwt.adapter';
-import { DevicesService } from '../application/device.service';
+
 import { UserAll, UserId } from '../../../infrastructure/decorators/get-user.decorator';
-import { DevicesQueryRepository } from '../repositories/device.query.repository';
+
 import { AuthSessionTokenGuard } from '../../../infrastructure/guards/auth-session-token.guard';
 import { DeviceId } from '../../../infrastructure/decorators/get-device.decorator';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteDeviceCommand } from '../application/usecases/delete-device.usecase';
-import { DeviceViewModel } from './models/output/device-output.model';
+//import { DeviceViewModel } from './models/output/device-output.model';
 import { User } from '../../users/domain/db-model';
+import { DevicesQueryRepository } from '../repositories/device.query.repository';
+import { DevicesService } from '../application/device.service';
+import { DeviceViewModel } from './models/output/device-output.model';
 
 @Controller('security/devices')
 export class DeviceController {
@@ -32,7 +35,7 @@ export class DeviceController {
     @HttpCode(204)
     @UseGuards(AuthSessionTokenGuard)
     async deleteDevicesExcludeCurrent(@UserAll() user: User, @DeviceId() deviceId: string): Promise<void> {
-        //console.log(req.deviceId)
+        //console.log(deviceId)
         await this.devicesService.deleteDeviceExceptCurrent(user!.id.toString(), deviceId!.toString());
     }
 

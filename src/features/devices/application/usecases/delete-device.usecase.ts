@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DevicesRepository } from '../../repositories/device.repository';
+import { DevicesQueryRepository } from '../../repositories/device.query.repository';
 
 export class DeleteDeviceCommand {
     constructor(
@@ -10,11 +11,14 @@ export class DeleteDeviceCommand {
 
 @CommandHandler(DeleteDeviceCommand)
 export class DeleteDeviceUseCase implements ICommandHandler<DeleteDeviceCommand> {
-    constructor(private readonly devicesRepository: DevicesRepository) {}
+    constructor(
+        private readonly devicesQueryRepository: DevicesQueryRepository,
+        private readonly devicesRepository: DevicesRepository,
+    ) {}
 
     async execute(command: DeleteDeviceCommand): Promise<204 | 403 | 404> {
         //можно добавить ENUM
-        const device = await this.devicesRepository.findDevice(command.deviceId);
+        const device = await this.devicesQueryRepository.findDevice(command.deviceId);
         if (!device) return 404;
         if (device.userId !== command.userId) return 403;
         await this.devicesRepository.deleteDevicesById(command.deviceId);

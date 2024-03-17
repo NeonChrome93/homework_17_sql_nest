@@ -54,7 +54,7 @@ export class UserController {
     @HttpCode(204)
     @UseGuards(BasicAuthGuard)
     async deleteUserById(@Param('id') userId: string) {
-        const idDeleted = this.commandBus.execute(new DeleteUserCommand(userId));
+        const idDeleted = await this.commandBus.execute(new DeleteUserCommand(userId));
         if (!idDeleted) {
             throw new NotFoundException('user not found');
         } else return idDeleted;

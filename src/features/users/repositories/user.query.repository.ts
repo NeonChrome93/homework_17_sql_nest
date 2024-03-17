@@ -1,4 +1,4 @@
-import { PaginationModels, QueryUserPaginationType } from '../../../utils/pagination';
+import { PaginationModels } from '../../../utils/pagination';
 import { Injectable } from '@nestjs/common';
 import { UserViewModel } from '../api/models/output/user.output.model';
 import { DataSource } from 'typeorm';
@@ -39,37 +39,33 @@ export class UsersQueryRepository {
     //     };
     // }
 
-    async getAllUsers(
+    async getUsers(
         sortBy: string,
         sortDirection: string,
-        pageNumber: string,
-        pageSize: string,
+        pageNumber: number,
+        pageSize: number,
         searchLoginTerm: string,
         searchEmailTerm: string,
     ): Promise<PaginationModels<UserViewModel[]>> {
-        if (sortBy === 'login') {
-            sortBy = 'userName';
-        }
-
+        // if (sortBy === 'login') {
+        //     sortBy = 'userName';
+        // }
+        console.log(pageNumber, pageSize);
         const queryFilter = `
 				select *
-					from public."Users"
-						WHERE "userName" ILIKE $1 OR "email" ILIKE $2
+					from public."users"
+					WHERE "login" ILIKE '%${searchLoginTerm}%' OR "email" ILIKE '%${searchEmailTerm}%'
 						order by "${sortBy}" ${sortDirection}
-						limit $3 offset $4
+					  limit ${pageSize} offset ${(pageNumber - 1) * pageSize}
 	`;
 
-        const findAllUsers = await this.dataSource.query(queryFilter, [
-            `%${searchLoginTerm}%`,
-            `%${searchEmailTerm}%`,
-            +pageSize,
-            (+pageNumber - 1) * +pageSize,
-        ]);
+        const findAllUsers = await this.dataSource.query(queryFilter);
 
+        // console.log(findAllUsers);
         const countTotalCount = `
-		SELECT count(*)
-			from "Users"
-				WHERE "userName" ILIKE $1 OR "email" ILIKE $2
+		    SELECT count(id)
+			  from "users"
+				WHERE "login" ILIKE $1 OR "email" ILIKE $2
 	`;
 
         const resultCount = await this.dataSource.query(countTotalCount, [
@@ -78,11 +74,11 @@ export class UsersQueryRepository {
         ]);
         const totalCount = resultCount[0].count;
 
-        const pagesCount: number = await Math.ceil(totalCount / +pageSize);
+        const pagesCount: number = await Math.ceil(totalCount / pageSize);
         return {
             pagesCount: pagesCount,
-            page: +pageNumber,
-            pageSize: +pageSize,
+            page: pageNumber,
+            pageSize: pageSize,
             totalCount: +totalCount,
             items: findAllUsers.map(
                 (user: User): UserViewModel => ({

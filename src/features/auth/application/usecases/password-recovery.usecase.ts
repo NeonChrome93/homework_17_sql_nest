@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
-import { UsersRepository } from '../../../users/repositories/user.repository';
 import { EmailAdapter } from '../../adapters/email.adapter';
 import { add } from 'date-fns';
+import { UserRepository } from '../../../users/repositories/user-repository';
 
 export class PasswordRecoveryCommand {
     constructor(public email: string) {}
@@ -11,7 +11,7 @@ export class PasswordRecoveryCommand {
 @CommandHandler(PasswordRecoveryCommand)
 export class PasswordRecoveryUseCase implements ICommandHandler<PasswordRecoveryCommand> {
     constructor(
-        private readonly usersRepository: UsersRepository,
+        private readonly usersRepository: UserRepository,
         private readonly emailService: EmailAdapter,
     ) {}
 

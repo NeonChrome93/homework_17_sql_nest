@@ -7,7 +7,7 @@ export class UserRepository {
     constructor(private dataSource: DataSource) {}
 
     async createUser(newUser: UserDbModel) {
-        console.log(newUser.createdAt);
+        //console.log(newUser.createdAt);
         const userId = await this.dataSource.query(
             `
 			INSERT INTO public.users("login", "email", "passwordHash", "createdAt",  "confirmationCode", "expirationDateOfRecoveryCode", "isConfirmed")
@@ -50,12 +50,35 @@ export class UserRepository {
     }
 
     async saveUser(newUser: User) {
-        const user = newUser;
+        const query = `UPDATE public.users
+                    SET  login=$1, email=$2, "passwordSalt"=$3, "passwordHash"=$4, "createdAt"=$5,"confirmationCode"=$6,
+                    "isConfirmed"=$7, "passwordRecoveryCode"=$8, "expirationDateOfRecoveryCode"=$9
+                     WHERE "id" = $10`;
+        const user = await this.dataSource.query(query, [
+            newUser.login,
+            newUser.email,
+            newUser.passwordSalt,
+            newUser.passwordHash,
+            newUser.createdAt,
+            newUser.confirmationCode,
+            newUser.isConfirmed,
+            newUser.passwordRecoveryCode,
+            newUser.expirationDateOfRecoveryCode,
+            newUser.id,
+        ]);
+
         return user;
     }
 
     async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
-        return null;
+        const query = `
+        SELECT *
+        FROM public.users
+        WHERE "login" = $1 OR "email" = $1
+    `;
+
+        const result: User | null = await this.dataSource.query(query, [loginOrEmail]);
+        return result[0];
     }
 
     async findUserByRecoveryCode(recoveryCode: string): Promise<User | null> {
@@ -72,22 +95,54 @@ export class UserRepository {
 
     async readUserByCode(code: string): Promise<User | null> {
         // const user: User | null = await this.UserModel.findOne({confirmationCode: code});
-        // if (!user) {
-        //     return null;
-        // }
-        // return user
-        return null;
+        const user = await this.dataSource.query(
+            `
+        SELECT  *
+        FROM public.users
+        WHERE "confirmationCode" = $1;
+`,
+            [code],
+        );
+
+        if (!user) {
+            return null;
+        }
+        return user[0];
     }
 
     async readUserByEmail(email: string): Promise<User | null> {
-        return null;
+        const user = await this.dataSource.query(
+            `
+        SELECT *
+        FROM public.users
+        WHERE email = $1;
+`,
+            [email],
+        );
+
+        if (!user) {
+            return null;
+        }
+        return user[0];
     }
 
-    async updateConfirmationCode(id: string, newCode: string): Promise<any> {
-        return null;
+    async updateConfirmationCode(id: string, newCode: string): Promise<boolean> {
+        const query = `UPDATE public.users
+                       SET  "confirmationCode"= $1
+                       WHERE id = $2`;
+        const result = await this.dataSource.query(query, [newCode, id]);
+        console.log(id, newCode);
+        if (!result) return false;
+        return true;
     }
 
-    async confirmEmail(id: string): Promise<void> {
-        return null;
+    async confirmEmail(id: string): Promise<boolean> {
+        const query = `UPDATE public.users
+                       SET  "isConfirmed"= true
+                       WHERE id = $1`;
+        const result = await this.dataSource.query(query, [id]);
+
+        if (!result) return false;
+        return true;
     }
 }

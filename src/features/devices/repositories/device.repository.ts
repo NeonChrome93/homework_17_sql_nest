@@ -9,19 +9,15 @@ export class DevicesRepository {
     async createDevice(device: Device): Promise<Device> {
         const deviceId = await this.dataSource.query(
             `INSERT INTO public.devices(
-          ip, "deviceId", "userId", title, "lastActiveDate")
-        VALUES (1$, 2$, 3$, 4$, 5$) returning deviceId`,
-            [device.ip, device.deviceId, device.userId, device.title, device.lastActiveDate],
+          ip, "userId", title, "lastActiveDate")
+        VALUES ($1, $2, $3, $4) returning 'deviceId'`,
+            [device.ip, device.userId, device.title, device.lastActiveDate],
         );
         return deviceId[0];
     }
 
     async isDeviceExistByUserIdAndDeviceId(deviceId: string, userId: string): Promise<boolean> {
         return false;
-    }
-
-    async findDevice(deviceId: string): Promise<Device | null> {
-        return null;
     }
 
     // async findAllUserDevices(userId: string) :Promise<DeviceViewModel[]>{
@@ -42,7 +38,11 @@ export class DevicesRepository {
     }
 
     async deleteDeviceExpectCurrent(userId: string, deviceId: string): Promise<boolean> {
-        return false;
+        const query = `DELETE FROM public.devices
+			  WHERE NOT "deviceId" = $1`;
+        const deleted = await this.dataSource.query(query, [deviceId]);
+        if (!deleted) return false;
+        return true;
     }
 
     async deleteDevicesById(deviceId: string): Promise<boolean> {

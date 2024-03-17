@@ -1,23 +1,25 @@
-import {IfCodeExist} from "../../../../../infrastructure/decorators/registration-conformation.decorator";
-import {IsEmail, IsNotEmpty, IsString, MaxLength, MinLength} from "class-validator";
-import {IfUserExistOrConfirmed} from "../../../../../infrastructure/decorators/registration-email-resending.decorator";
-import {Trim} from "../../../../../models/custom";
+import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import { Trim } from '../../../../../infrastructure/validation/custom';
+import { IfCodeExist } from '../../../../../infrastructure/decorators/registration-conformation.decorator';
+import { IfUserExistOrConfirmed } from '../../../../../infrastructure/decorators/registration-email-resending.decorator';
 
-export class CodeDto  {
+export class CodeDto {
     @IfCodeExist({
-        message: 'user with this code not exist or already confirmed'})
+        message: 'user with this code not exist or already confirmed',
+    })
     @IsString()
     @IsNotEmpty()
-    code: string
+    code: string;
 }
 
-export class EmailDto  {
+export class EmailDto {
     @IfUserExistOrConfirmed({
-        message: 'user with this email not exist or already confirmed'})
-    @IsEmail( )
+        message: 'user with this email not exist or already confirmed',
+    })
+    @IsEmail()
     @IsString()
     @IsNotEmpty()
-    email: string
+    email: string;
 }
 
 export class NewPasswordDto {
@@ -26,8 +28,8 @@ export class NewPasswordDto {
     @Trim()
     @IsString()
     @IsNotEmpty()
-    newPassword: string
+    newPassword: string;
     @IsString()
     @IsNotEmpty()
-    recoveryCode: string
+    recoveryCode: string;
 }

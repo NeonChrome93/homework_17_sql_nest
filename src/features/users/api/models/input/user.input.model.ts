@@ -1,25 +1,25 @@
 import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
-
-function IsUserAlreadyExist() {}
+import { IsUserAlreadyExist } from '../../../../../infrastructure/decorators/user-exist.decorator';
+import { Trim } from '../../../../../infrastructure/validation/custom';
 
 export class UserCreateModelDto {
-    // @IsUserAlreadyExist({
-    //   message: 'User already exists. Choose another name.',
-    // })
+    @IsUserAlreadyExist({
+        message: 'User already exists. Choose another name.',
+    })
     @MaxLength(10)
     @MinLength(3)
-    // @Trim()
+    @Trim()
     @IsString()
     @IsNotEmpty()
     login: string;
-    //@IsUserAlreadyExist()
+    @IsUserAlreadyExist()
     @IsEmail()
     @IsString()
     @IsNotEmpty()
     email: string;
     @MaxLength(20)
     @MinLength(6)
-    //@Trim()
+    @Trim()
     @IsString()
     @IsNotEmpty()
     password: string;

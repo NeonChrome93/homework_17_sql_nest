@@ -1,6 +1,5 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { User } from '../../users/domain/db-model';
 
 @Injectable()
@@ -10,10 +9,14 @@ export class JwtAdapter {
     createJWT(user: User) {
         //TODO: 10s
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || '123', {
-            expiresIn: process.env.ACCESS_TIME,
+            expiresIn: process.env.ACCESS_TIME || '5m',
         });
         return token;
     }
+    //
+    // ERROR [ExceptionsHandler] "expiresIn" should be a number of seconds or string representing a timespan
+    // Error: "expiresIn" should be a number of seconds or string representing a timespan
+    // ACCESS_TIME=10s перетащил из старого проекта, и теперь такое выдает
 
     getUserIdByToken(token: string) {
         try {
@@ -28,7 +31,7 @@ export class JwtAdapter {
     generateRefreshToken(user: User, deviceId: string) {
         //deviceId
         return jwt.sign({ userId: user.id, deviceId: deviceId }, process.env.JWT_SECRET || '123', {
-            expiresIn: process.env.REFRESH_TIME,
+            expiresIn: process.env.REFRESH_TIME || '10m',
         });
     }
 
