@@ -15,18 +15,31 @@ import { BasicAuthGuard } from '../../../infrastructure/guards/basic-auth.guard'
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/create-user.usecase';
 import { DeleteUserCommand } from '../application/usecases/delete-user.command';
+import { getQueryUserPagination } from '../../../utils/pagination';
+import { UsersQueryRepository } from '../repositories/user.query.repository';
 
 @Controller('sa/users')
 export class UserController {
-    constructor(private readonly commandBus: CommandBus) {}
+    constructor(
+        private readonly commandBus: CommandBus,
+        private readonly usersQueryRepository: UsersQueryRepository,
+    ) {}
 
     @Get()
     @UseGuards(BasicAuthGuard)
     async getUsers(@Query() queryDto: UsersQueryType) {
-        // const pagination = getQueryPagination(queryDto);
-        // const arr = await this.usersQueryRepository.getUsers(pagination);
+        const pagination = getQueryUserPagination(queryDto);
+        const { sortBy, sortDirection, searchLoginTerm, searchEmailTerm, pageSize, pageNumber } = pagination;
+        const arr = await this.usersQueryRepository.getUsers(
+            sortBy,
+            sortDirection,
+            pageNumber,
+            pageSize,
+            searchLoginTerm,
+            searchEmailTerm,
+        );
         //SQL выбровка уже идет
-        //  return arr;
+        return arr;
     }
 
     @Post()
