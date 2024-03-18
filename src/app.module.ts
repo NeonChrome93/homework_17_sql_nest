@@ -31,6 +31,7 @@ import { DelController } from './testing-all-data/testing.controller';
 import { IsUserAlreadyExistConstraint } from './infrastructure/decorators/user-exist.decorator';
 import { RegistrationConfirmCodeConstraint } from './infrastructure/decorators/registration-conformation.decorator';
 import { RegistrationEmailResendingConstraint } from './infrastructure/decorators/registration-email-resending.decorator';
+import { ConfigModule } from '@nestjs/config';
 
 const adapters = [JwtAdapter, EmailAdapter];
 const constraints = [
@@ -63,12 +64,14 @@ const useCases = [
 
 @Module({
     imports: [
-        // ThrottlerModule.forRoot([
-        //     {
-        //         // ttl: 10000,
-        //         // limit: 5,
-        //     },
-        //]),
+        ThrottlerModule.forRoot([
+            {
+                ttl: 10000,
+                limit: 5,
+            },
+        ]),
+
+        ConfigModule.forRoot({ isGlobal: true }),
         CqrsModule,
         PassportModule,
         TypeOrmModule.forRoot({
