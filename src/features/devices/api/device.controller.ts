@@ -41,7 +41,7 @@ export class DeviceController {
 
     @Delete(':deviceId')
     @UseGuards(AuthSessionTokenGuard)
-    //@HttpCode(204)
+    @HttpCode(204)
     async deleteDeviceById(@Param('deviceId') deviceId: string, @UserAll() user: User, @Res() res: Response) {
         const status = await this.commandBus.execute(new DeleteDeviceCommand(deviceId, user!.id.toString()));
         return res.sendStatus(status);

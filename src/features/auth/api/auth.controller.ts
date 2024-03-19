@@ -33,6 +33,8 @@ import { BearerAuthGuard } from '../../../infrastructure/guards/user.guard';
 import { User } from '../../users/domain/db-model';
 import { UserRepository } from '../../users/repositories/user-repository';
 import { UserAll } from '../../../infrastructure/decorators/get-user.decorator';
+import { DevicesRepository } from '../../devices/repositories/device.repository';
+import { DevicesService } from '../../devices/application/device.service';
 
 @Controller('auth')
 export class AuthController {
@@ -40,8 +42,8 @@ export class AuthController {
         private readonly authService: AuthService,
         private readonly jwtService: JwtAdapter,
         private readonly usersRepository: UserRepository,
-        //private readonly devicesService: DevicesService,
-        //private readonly devicesRepository: DevicesRepository,
+        private readonly devicesService: DevicesService,
+        private readonly devicesRepository: DevicesRepository,
         private readonly commandBus: CommandBus,
     ) {}
 
@@ -57,7 +59,7 @@ export class AuthController {
     }
 
     @Post('/login') //отдельный юз кейс на каждый запрос
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(ThrottlerGuard, LocalAuthGuard)
     @HttpCode(200)
     //@Throttle({default: {ttl: 10000, limit: 5}})
     async authLogin(
@@ -87,8 +89,6 @@ export class AuthController {
         const refreshToken = req.cookies.refreshToken;
         console.log(refreshToken);
 
-        // const device = await findDeviceById(payload.deviceId)
-        // if(device.lastActiveDate !== payload.lastActiveDate) return res.sendStatus(401)
         const result = await this.authService.refresh(user, refreshToken);
         if (!result) return res.sendStatus(401);
         return res
@@ -108,7 +108,7 @@ export class AuthController {
             const refreshToken = req.cookies.refreshToken;
             //добавить миддлвару на наличие токена
             if (refreshToken) {
-                //await this.devicesRepository.deleteDevicesById(deviceId!.toString());
+                await this.devicesRepository.deleteDevicesById(deviceId!);
                 //достать device из БД и сравнить lastActiveDate из БД и из текущего токена
                 //delete device by deviceId
                 //в чс уже не помещает, выйти с текущего устройства
@@ -123,7 +123,7 @@ export class AuthController {
 
     @Post('/registration')
     //@Throttle({default: {ttl: 10000, limit: 5}})
-    //@UseGuards(ThrottlerGuard)
+    @UseGuards(ThrottlerGuard)
     @HttpCode(204)
     async registrationUser(@Body() dto: UserCreateModelDto) {
         await this.commandBus.execute(
@@ -139,7 +139,7 @@ export class AuthController {
 
     @Post('/registration-confirmation')
     //@Throttle({default: {ttl: 10000, limit: 5}})
-    //@UseGuards(ThrottlerGuard)
+    @UseGuards(ThrottlerGuard)
     @HttpCode(204)
     async confirmRegistration(@Body() codeDto: CodeDto) {
         const isConfirmed = await this.commandBus.execute(new ConfirmEmailCommand(codeDto.code));
@@ -172,7 +172,7 @@ export class AuthController {
     @Post('/registration-email-resending')
     @HttpCode(204)
     //@Throttle({default: {ttl: 10000, limit: 5}})
-    //@UseGuards(ThrottlerGuard)
+    @UseGuards(ThrottlerGuard)
     async receivedCode(@Body() emailDto: EmailDto) {
         const receivedCode = await this.commandBus.execute(new ResendingCodeCommand(emailDto.email));
         if (!receivedCode) {

@@ -32,6 +32,7 @@ import { IsUserAlreadyExistConstraint } from './infrastructure/decorators/user-e
 import { RegistrationConfirmCodeConstraint } from './infrastructure/decorators/registration-conformation.decorator';
 import { RegistrationEmailResendingConstraint } from './infrastructure/decorators/registration-email-resending.decorator';
 import { ConfigModule } from '@nestjs/config';
+import { DeviceController } from './features/devices/api/device.controller';
 
 const adapters = [JwtAdapter, EmailAdapter];
 const constraints = [
@@ -86,7 +87,7 @@ const useCases = [
         }),
         // смотреть видео о переменных окружения
     ],
-    controllers: [AppController, UserController, AuthController, DelController],
+    controllers: [AppController, UserController, AuthController, DelController, DeviceController],
     providers: [
         AppService,
         AuthService,

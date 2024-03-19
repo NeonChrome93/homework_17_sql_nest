@@ -7,34 +7,30 @@ export class DevicesRepository {
     constructor(private dataSource: DataSource) {}
 
     async createDevice(device: Device): Promise<Device> {
-        const deviceId = await this.dataSource.query(
+        const resultDevice = await this.dataSource.query(
             `INSERT INTO public.devices(
-          ip, "userId", title, "lastActiveDate")
-        VALUES ($1, $2, $3, $4) returning 'deviceId'`,
-            [device.ip, device.userId, device.title, device.lastActiveDate],
+          "deviceId" ,ip, "userId", title, "lastActiveDate")
+        VALUES ($1, $2, $3, $4, $5) returning 'deviceId'`,
+            [device.deviceId, device.ip, device.userId, device.title, device.lastActiveDate],
         );
-        return deviceId[0];
+        return resultDevice[0];
     }
 
     async isDeviceExistByUserIdAndDeviceId(deviceId: string, userId: string): Promise<boolean> {
-        return false;
+        const query = `SELECT FROM public.devices
+			  WHERE "deviceId" = $1 AND "userId" = $2`;
+        const result = await this.dataSource.query(query, [deviceId, userId]);
+        if (!result) return false;
+        return true;
     }
 
-    // async findAllUserDevices(userId: string) :Promise<DeviceViewModel[]>{
-    //     return  DeviceModel.find({userId}, {projection: {_id: 0, userId: 0}}).lean()
-    // },
-
     async updateDeviceLastActiveDate(deviceId: string, lastActiveDate: string): Promise<boolean> {
-        try {
-            // вызовите метод слоя доступа к данным, который обновляет дату последней активности устройства
-            await this.updateDeviceLastActiveDate(deviceId, lastActiveDate);
-
-            return true; // вернуть true в случае успешного обновления
-        } catch (error) {
-            console.error('Ошибка при обновлении даты последней активности устройства:', error);
-            return false; // вернуть false в случае ошибки
-        }
-        //Смотреть оператор NOT
+        const query = `UPDATE public.devices
+                       SET "lastActiveDate" = $1
+                       WHERE "deviceId" = $2`;
+        const update = await this.dataSource.query(query, [lastActiveDate, deviceId]);
+        if (!update) return false;
+        return true;
     }
 
     async deleteDeviceExpectCurrent(userId: string, deviceId: string): Promise<boolean> {

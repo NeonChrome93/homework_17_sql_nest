@@ -11,7 +11,7 @@ export class DevicesQueryRepository {
         const query = `
             SELECT * FROM 
             public.devices
-            WHERE "userId" = 1$
+            WHERE "userId" = $1
             `;
 
         const getDevices = await this.dataSource.query(query, [userId]);
@@ -25,10 +25,11 @@ export class DevicesQueryRepository {
         const query = `
             SELECT * FROM 
             public.devices
-            WHERE "deviceId" = 1$
+            WHERE "deviceId" = $1
             `;
-
-        const getDevices: Device | null = await this.dataSource.query(query, [deviceId]);
-        return getDevices[0];
+        console.log('deviceId', deviceId);
+        const getDevices = await this.dataSource.query(query, [deviceId]);
+        console.log('getDevices', getDevices);
+        return getDevices[0] || null;
     }
 }

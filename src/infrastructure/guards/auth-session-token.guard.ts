@@ -3,8 +3,6 @@ import { JwtAdapter } from '../../features/auth/adapters/jwt.adapter';
 import { UserService } from '../../features/users/application/user.service';
 import { DevicesRepository } from '../../features/devices/repositories/device.repository';
 import { DevicesService } from '../../features/devices/application/device.service';
-//import { DevicesService } from '../../features/devices/application/device.service';
-//import { DevicesRepository } from '../../features/devices/repositories/device.repository';
 
 @Injectable()
 export class AuthSessionTokenGuard implements CanActivate {
@@ -29,19 +27,20 @@ export class AuthSessionTokenGuard implements CanActivate {
         }
 
         if (payload.userId && payload.deviceId) {
-            request.user = await this.userService.findUserById(payload.userId.toString());
+            request.user = await this.userService.findUserById(payload.userId);
             if (!request.user) throw new UnauthorizedException();
             request.deviceId = payload.deviceId;
         }
-
-        const existDevice = await this.devicesRepository.isDeviceExistByUserIdAndDeviceId(
-            payload.deviceId,
-            payload.userId,
-        );
-        if (!existDevice) {
-        }
+        //вынести логику в auth service
+        // const existDevice = await this.devicesRepository.isDeviceExistByUserIdAndDeviceId(
+        //     payload.deviceId,
+        //     payload.userId,
+        // );
+        // if (!existDevice) {
+        // }
 
         const device = await this.devicesService.findDeviceById(payload.deviceId);
+        console.log(device);
         const tokenDate = this.jwtService.lastActiveDate(refreshToken);
 
         const tokenTime = new Date(tokenDate).getTime();
