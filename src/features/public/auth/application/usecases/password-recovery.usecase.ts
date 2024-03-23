@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { EmailAdapter } from '../../adapters/email.adapter';
 import { add } from 'date-fns';
-import { UserRepository } from '../../../users/repositories/user-repository';
+import { UserRepository } from '../../../../admin/users/repositories/user-repository';
 
 export class PasswordRecoveryCommand {
     constructor(public email: string) {}

@@ -11,11 +11,11 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { UserCreateModelDto, UsersQueryType } from './models/input/user.input.model';
-import { BasicAuthGuard } from '../../../infrastructure/guards/basic-auth.guard';
+import { BasicAuthGuard } from '../../../../infrastructure/guards/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/create-user.usecase';
 import { DeleteUserCommand } from '../application/usecases/delete-user.command';
-import { getQueryUserPagination } from '../../../utils/pagination';
+import { getQueryUserPagination } from '../../../../utils/pagination';
 import { UsersQueryRepository } from '../repositories/user.query.repository';
 
 @Controller('sa/users')

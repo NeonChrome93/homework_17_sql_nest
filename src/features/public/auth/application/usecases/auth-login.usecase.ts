@@ -1,7 +1,7 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { JwtAdapter } from '../../adapters/jwt.adapter';
-import { User } from '../../../users/domain/db-model';
+import { User } from '../../../../admin/users/domain/db-model';
 import { CreateDeviceCommand } from '../../../devices/application/usecases/create-device.usecase';
 
 export class AuthLoginCommand {

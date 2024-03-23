@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { EmailAdapter } from '../../adapters/email.adapter';
-import { UserRepository } from '../../../users/repositories/user-repository';
+import { UserRepository } from '../../../../admin/users/repositories/user-repository';
 
 export class ResendingCodeCommand {
     constructor(public email: string) {}
@@ -17,7 +17,7 @@ export class ResendingCodeUseCase implements ICommandHandler<ResendingCodeComman
     //переотправка кода
     async execute(command: ResendingCodeCommand): Promise<boolean> {
         const user = await this.usersRepository.readUserByEmail(command.email);
-        console.log(user);
+        console.log('Userrrr', user);
         if (!user) return false;
         const newCode = randomUUID();
         await this.usersRepository.updateConfirmationCode(user.id, newCode);

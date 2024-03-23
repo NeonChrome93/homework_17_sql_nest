@@ -1,12 +1,12 @@
-import { UserService } from '../../users/application/user.service';
+import { UserService } from '../../../admin/users/application/user.service';
 import { Injectable } from '@nestjs/common';
 import { JwtAdapter } from '../adapters/jwt.adapter';
 import { EmailAdapter } from '../adapters/email.adapter';
 import { DevicesService } from '../../devices/application/device.service';
 import { DevicesRepository } from '../../devices/repositories/device.repository';
 import { CommandBus } from '@nestjs/cqrs';
-import { UserRepository } from '../../users/repositories/user-repository';
-import { User } from '../../users/domain/db-model';
+import { UserRepository } from '../../../admin/users/repositories/user-repository';
+import { User } from '../../../admin/users/domain/db-model';
 
 @Injectable()
 export class AuthService {

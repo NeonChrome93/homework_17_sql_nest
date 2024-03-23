@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UserRepository } from '../../../users/repositories/user-repository';
+import { UserRepository } from '../../../../admin/users/repositories/user-repository';
 
 export class ConfirmEmailCommand {
     constructor(public code: string) {}

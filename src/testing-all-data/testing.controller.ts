@@ -1,5 +1,5 @@
 import { Controller, Delete, HttpCode } from '@nestjs/common';
-import { UserRepository } from '../features/users/repositories/user-repository';
+import { UserRepository } from '../features/admin/users/repositories/user-repository';
 import { DataSource } from 'typeorm';
 
 @Controller('testing')

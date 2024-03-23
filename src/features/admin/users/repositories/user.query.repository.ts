@@ -1,4 +1,4 @@
-import { PaginationModels } from '../../../utils/pagination';
+import { PaginationModels } from '../../../../utils/pagination';
 import { Injectable } from '@nestjs/common';
 import { UserViewModel } from '../api/models/output/user.output.model';
 import { DataSource } from 'typeorm';

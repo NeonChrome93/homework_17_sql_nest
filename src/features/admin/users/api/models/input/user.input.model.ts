@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
-import { IsUserAlreadyExist } from '../../../../../infrastructure/decorators/user-exist.decorator';
-import { Trim } from '../../../../../infrastructure/validation/custom';
+import { IsUserAlreadyExist } from '../../../../../../infrastructure/decorators/user-exist.decorator';
+import { Trim } from '../../../../../../infrastructure/validation/custom';
 
 export class UserCreateModelDto {
     @IsUserAlreadyExist({

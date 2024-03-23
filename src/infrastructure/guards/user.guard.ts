@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserService } from '../../features/users/application/user.service';
-import { JwtAdapter } from '../../features/auth/adapters/jwt.adapter';
+import { UserService } from '../../features/admin/users/application/user.service';
+import { JwtAdapter } from '../../features/public/auth/adapters/jwt.adapter';
 
 @Injectable()
 export class BearerAuthGuard implements CanActivate {

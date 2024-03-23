@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UserCreateModelDto } from '../../../users/api/models/input/user.input.model';
-import { UserViewModel } from '../../../users/api/models/output/user.output.model';
+import { UserCreateModelDto } from '../../../../admin/users/api/models/input/user.input.model';
+import { UserViewModel } from '../../../../admin/users/api/models/output/user.output.model';
 import bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { EmailAdapter } from '../../adapters/email.adapter';
-import { UserRepository } from '../../../users/repositories/user-repository';
-import { User } from '../../../users/domain/db-model';
+import { UserRepository } from '../../../../admin/users/repositories/user-repository';
+import { User } from '../../../../admin/users/domain/db-model';
 
 export class RegistrationUserCommand {
     constructor(public userCreateModel: UserCreateModelDto) {}
