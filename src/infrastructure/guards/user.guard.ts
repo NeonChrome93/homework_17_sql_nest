@@ -20,7 +20,7 @@ export class BearerAuthGuard implements CanActivate {
         console.log(token, 'Auth token');
 
         if (userId) {
-            const user = await this.userService.findUserById(userId.toString()).then(user => {
+            await this.userService.findUserById(userId.toString()).then(user => {
                 request.user = user ? user : null;
             });
             return true;

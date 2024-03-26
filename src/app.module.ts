@@ -33,6 +33,12 @@ import { RegistrationConfirmCodeConstraint } from './infrastructure/decorators/r
 import { RegistrationEmailResendingConstraint } from './infrastructure/decorators/registration-email-resending.decorator';
 import { ConfigModule } from '@nestjs/config';
 import { DeviceController } from './features/public/devices/api/device.controller';
+import { BlogController } from './features/admin/blogs/api/blog.controller';
+import { CreateBlogUseCase } from './features/admin/blogs/application/usecases/create-blog.usecase';
+import { BlogRepository } from './features/admin/blogs/repositories/blog.repository';
+import { DeleteBlogUseCase } from './features/admin/blogs/application/usecases/delete-blog-usecase';
+import { UpdateBlogUseCase } from './features/admin/blogs/application/usecases/update.blog.usecase';
+import { BlogQueryRepository } from './features/admin/blogs/repositories/blog.query.repository';
 
 const adapters = [JwtAdapter, EmailAdapter];
 const constraints = [
@@ -40,10 +46,19 @@ const constraints = [
     RegistrationConfirmCodeConstraint,
     RegistrationEmailResendingConstraint,
 ];
+const repository = [
+    UserRepository,
+    DevicesRepository,
+    UsersQueryRepository,
+    DevicesQueryRepository,
+    LocalStrategy,
+    BlogRepository,
+    BlogQueryRepository,
+];
 const useCases = [
-    // CreateBlogUseCase,
-    // DeleteBlogUseCase,
-    // UpdateBlogUseCase,
+    CreateBlogUseCase,
+    DeleteBlogUseCase,
+    UpdateBlogUseCase,
     // UpdatePostUseCase,
     // AddLikesByPostUseCase,
     // DeletePostUseCase,
@@ -87,20 +102,16 @@ const useCases = [
         }),
         // смотреть видео о переменных окружения
     ],
-    controllers: [AppController, UserController, AuthController, DelController, DeviceController],
+    controllers: [AppController, UserController, AuthController, DelController, DeviceController, BlogController],
     providers: [
         AppService,
         AuthService,
-        UserRepository,
-        DevicesRepository,
-        UsersQueryRepository,
-        DevicesQueryRepository,
-        LocalStrategy,
         UserService,
         DevicesService,
         ...adapters,
         ...useCases,
         ...constraints,
+        ...repository,
     ],
 })
 export class AppModule {}
