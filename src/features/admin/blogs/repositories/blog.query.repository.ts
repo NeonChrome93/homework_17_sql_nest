@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PaginationModels, QueryPaginationType } from '../../../../utils/pagination';
 import { BlogsViewType } from '../api/models/output/blog.output.model';
 import { DataSource } from 'typeorm';
-import { BlogDbType } from '../domain/blog.entity';
+import { Blog, BlogDbType } from '../domain/blog.entity';
+import { PostViewType } from '../../../public/posts/api/models/output/post-output.model';
+import { postDbType } from '../../../public/posts/domain/post.entity';
 
 @Injectable()
 export class BlogQueryRepository {
@@ -89,27 +91,66 @@ export class BlogQueryRepository {
         };
     }
 
-    // async readPostsByBlogId(
-    //     blogId: string,
-    //     pagination: QueryPaginationType,
-    //     userId?: string | null,
-    // ): Promise<PaginationModels<PostViewType[]>> {
-    //     const filter: FilterQuery<PostType> = { blogId };
-    //     const posts = await this.PostModel.find(filter)
-    //         .sort({ [pagination.sortBy]: pagination.sortDirection })
-    //         .skip(pagination.skip)
-    //         .limit(pagination.pageSize)
-    //         .exec();
-    //
-    //     const totalCount = await this.PostModel.countDocuments(filter).exec();
-    //     const items: PostViewType[] = posts.map((p: postDbType) => likesMapper(p, userId));
-    //     const pagesCount = Math.ceil(totalCount / pagination.pageSize);
-    //     return {
-    //         pagesCount: pagesCount === 0 ? 1 : pagesCount,
-    //         page: pagination.pageNumber,
-    //         pageSize: pagination.pageSize,
-    //         totalCount,
-    //         items,
-    //     };
-    // }
+    async readPostsByBlogId(
+        blogId: string,
+        pagination: QueryPaginationType,
+        userId?: string | null,
+    ): Promise<PaginationModels<PostViewType[]>> {
+        // const filter: FilterQuery<PostType> = { blogId };
+        // const posts = await this.PostModel.find(filter)
+        //     .sort({ [pagination.sortBy]: pagination.sortDirection })
+        //     .skip(pagination.skip)
+        //     .limit(pagination.pageSize)
+        //     .exec();
+        const queryFilter = `
+				SELECT * FROM public.posts
+					WHERE "blogId" = $1 
+						ORDER BY "${pagination.sortBy}" ${pagination.sortDirection}
+					  LIMIT ${pagination.pageSize} OFFSET ${(pagination.pageNumber - 1) * pagination.pageSize}
+	`;
+        const findPostsForBlog = await this.dataSource.query(queryFilter, [blogId]);
+        console.log(findPostsForBlog);
+
+        const countTotalCount = `
+		    SELECT count(id)
+			  FROM public.posts
+				WHERE "blogId" = $1
+	`;
+
+        const totalPostsCount = await this.dataSource.query(countTotalCount, [blogId]);
+        const totalCount: number = parseInt(totalPostsCount[0].count);
+        // const items: PostViewType[] = findPostsForBlog.map((p: postDbType) => likesMapper(p, userId));
+        const items: PostViewType[] = findPostsForBlog.map((p: postDbType) => ({
+            id: p.id,
+            title: p.title,
+            shortDescription: p.shortDescription,
+            content: p.content,
+            blogId: p.blogId,
+            blogName: p.blogName,
+            createdAt: p.createdAt,
+            extendedLikesInfo: {
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: 'None',
+                newestLikes: [],
+            },
+        }));
+        console.log(items);
+        const pagesCount = Math.ceil(totalCount / pagination.pageSize);
+
+        return {
+            pagesCount: pagesCount === 0 ? 1 : pagesCount,
+            page: pagination.pageNumber,
+            pageSize: pagination.pageSize,
+            totalCount,
+            items,
+        };
+    }
+
+    async readBlogsById(id: string): Promise<Blog | null> {
+        const query = `SELECT * FROM public.blogs
+                        WHERE id = $1`;
+        const blog = await this.dataSource.query(query, [id]);
+        return blog[0];
+    }
 }

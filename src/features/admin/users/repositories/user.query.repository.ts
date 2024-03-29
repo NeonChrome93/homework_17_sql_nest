@@ -8,7 +8,7 @@ import { User } from '../domain/db-model';
 export class UsersQueryRepository {
     constructor(private dataSource: DataSource) {}
 
-    // async getUsers(pagination: QueryUserPaginationType): Promise<PaginationModels<UserViewModel[]>> {
+    //= async getUsers(pagination: QueryUserPaginationType): Promise<PaginationModels<UserViewModel[]>> {
     //     const filter = {
     //         $or: [
     //             { login: { $regex: pagination.searchLoginTerm, $options: 'i' } },

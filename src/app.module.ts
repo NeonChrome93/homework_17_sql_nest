@@ -33,12 +33,23 @@ import { RegistrationConfirmCodeConstraint } from './infrastructure/decorators/r
 import { RegistrationEmailResendingConstraint } from './infrastructure/decorators/registration-email-resending.decorator';
 import { ConfigModule } from '@nestjs/config';
 import { DeviceController } from './features/public/devices/api/device.controller';
-import { BlogController } from './features/admin/blogs/api/blog.controller';
+import { BlogSaController } from './features/admin/blogs/api/blog.sa.controller';
 import { CreateBlogUseCase } from './features/admin/blogs/application/usecases/create-blog.usecase';
 import { BlogRepository } from './features/admin/blogs/repositories/blog.repository';
 import { DeleteBlogUseCase } from './features/admin/blogs/application/usecases/delete-blog-usecase';
 import { UpdateBlogUseCase } from './features/admin/blogs/application/usecases/update.blog.usecase';
 import { BlogQueryRepository } from './features/admin/blogs/repositories/blog.query.repository';
+import { BlogController } from './features/public/blogs/api/blog.controller';
+import { PostController } from './features/public/posts/api/post.controller';
+import { PostService } from './features/public/posts/application/post.service';
+import { PostRepository } from './features/public/posts/repositories/post.repository';
+import { PostsQueryRepository } from './features/public/posts/repositories/post.query.repository';
+import { UpdatePostUseCase } from './features/public/posts/application/usecases/update-post.usecase';
+import { AddLikesByPostUseCase } from './features/public/posts/application/usecases/add-likes-by-post.usecase';
+import { DeletePostUseCase } from './features/public/posts/application/usecases/delete-post.usecase';
+import { CreateCommentUseCase } from './features/public/comments/application/usecases/create-comment.usecase';
+import { CommentRepository } from './features/public/comments/repositories/comment.repository';
+import { CommentsQueryRepository } from './features/public/comments/repositories/comment.query.repository';
 
 const adapters = [JwtAdapter, EmailAdapter];
 const constraints = [
@@ -54,22 +65,26 @@ const repository = [
     LocalStrategy,
     BlogRepository,
     BlogQueryRepository,
+    PostsQueryRepository,
+    PostRepository,
+    CommentRepository,
+    CommentsQueryRepository,
 ];
 const useCases = [
     CreateBlogUseCase,
     DeleteBlogUseCase,
     UpdateBlogUseCase,
-    // UpdatePostUseCase,
-    // AddLikesByPostUseCase,
-    // DeletePostUseCase,
+    UpdatePostUseCase,
+    AddLikesByPostUseCase,
+    DeletePostUseCase,
     CreateUserUseCase,
     DeleteUserUseCase,
     CreateDeviceUseCase,
     DeleteDeviceUseCase,
-    // CreateCommentUseCase,
+    CreateCommentUseCase,
     // UpdateCommentUseCase,
     // AddReactionUseCase,
-    //DeleteCommentUseCase,
+    // DeleteCommentUseCase,
     RegistrationUserUseCase,
     ConfirmEmailUseCase,
     ResendingCodeUseCase,
@@ -80,12 +95,12 @@ const useCases = [
 
 @Module({
     imports: [
-        ThrottlerModule.forRoot([
-            {
-                ttl: 10000,
-                limit: 5,
-            },
-        ]),
+        // ThrottlerModule.forRoot([
+        //     {
+        //         ttl: 10000,
+        //         limit: 5,
+        //     },
+        // ]),
 
         ConfigModule.forRoot({ isGlobal: true }),
         CqrsModule,
@@ -101,13 +116,24 @@ const useCases = [
             synchronize: false,
         }),
         // смотреть видео о переменных окружения
+        //разнести на модули пока будет время
     ],
-    controllers: [AppController, UserController, AuthController, DelController, DeviceController, BlogController],
+    controllers: [
+        AppController,
+        UserController,
+        AuthController,
+        DelController,
+        DeviceController,
+        BlogSaController,
+        BlogController,
+        PostController,
+    ],
     providers: [
         AppService,
         AuthService,
         UserService,
         DevicesService,
+        PostService,
         ...adapters,
         ...useCases,
         ...constraints,

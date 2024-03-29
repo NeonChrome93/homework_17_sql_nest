@@ -2,7 +2,7 @@ import { UpdateBlogTypeDto } from '../api/models/input/blog.input.model';
 import { BlogsViewType } from '../api/models/output/blog.output.model';
 import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { Blog } from '../domain/blog.entity';
+import { Blog, BlogDbType } from '../domain/blog.entity';
 
 //todo also update blogName in posts
 // updateBlog(updateBlogDto){
@@ -10,16 +10,16 @@ import { Blog } from '../domain/blog.entity';
 export class BlogRepository {
     constructor(private dataSource: DataSource) {}
 
-    async readBlogsId(id: string): Promise<Blog | null> {
+    async readBlogsId(id: string): Promise<BlogDbType | null> {
         const query = `SELECT * FROM public.blogs
                         WHERE id = $1`;
-        const blog = await this.dataSource.query(query, [id]);
+        const blog: BlogDbType | null = await this.dataSource.query(query, [id]);
         return blog[0];
     }
 
     async createBlog(newBlog: Blog): Promise<BlogsViewType> {
         const query = `INSERT INTO public.blogs(
-                        name, description, "websiteUrl", "createdAt", " isMembership")
+                        name, description, "websiteUrl", "createdAt", "isMembership")
                        VALUES ($1, $2, $3, $4, $5)
                        returning id;`;
 
@@ -49,13 +49,15 @@ export class BlogRepository {
     }
 
     async deleteBlogs(id: string): Promise<boolean> {
-        console.log(id);
-        const query = `DELETE FROM public.blogs
+        const query = `DELETE FROM public.posts
+                        WHERE "blogId" = $1`;
+        const query2 = `DELETE FROM public.blogs
                         WHERE id = $1`;
 
         const deleted = await this.dataSource.query(query, [id]);
+        const deleted2 = await this.dataSource.query(query2, [id]);
 
-        if (!deleted) return false;
+        if (!deleted || !deleted2) return false;
         return true;
     }
 }

@@ -6,6 +6,7 @@ import {
     HttpCode,
     NotFoundException,
     Param,
+    ParseUUIDPipe,
     Post,
     Put,
     Query,
@@ -24,17 +25,27 @@ import { BasicAuthGuard } from '../../../../infrastructure/guards/basic-auth.gua
 import { SoftBearerAuthGuard } from '../../../../infrastructure/guards/user.guard';
 import { UserId } from '../../../../infrastructure/decorators/get-user.decorator';
 import { BlogQueryRepository } from '../repositories/blog.query.repository';
+import {
+    createPostByBlogIdDto,
+    UpdatePostDto,
+    UpdatePostForBlogDto,
+} from '../../../public/posts/api/models/input/post-input.model';
+import { PostService } from '../../../public/posts/application/post.service';
+import { EnhancedParseUUIDPipe } from '../../../../infrastructure/exceptions/parse_UUID.pipe.';
+import { UpdatePostCommand } from '../../../public/posts/application/usecases/update-post.usecase';
+import { DeletePostCommand } from '../../../public/posts/application/usecases/delete-post.usecase';
 
 @Controller('sa/blogs')
-export class BlogController {
+export class BlogSaController {
     constructor(
         private readonly blogQueryRepository: BlogQueryRepository,
         private commandBus: CommandBus,
-        //private readonly postService: PostService,
+        private readonly postService: PostService,
         private readonly blogRepository: BlogRepository,
     ) {}
 
     @Get() //Get All Blogs
+    @UseGuards(BasicAuthGuard)
     async getBlogs(@Query() queryDto: BlogsQueryType) {
         const pagination = getQueryPagination(queryDto);
         const arr = await this.blogQueryRepository.readBlogs(pagination);
@@ -42,12 +53,14 @@ export class BlogController {
     }
 
     @Get(':id') //Get Blog Id
+    @UseGuards(BasicAuthGuard)
     async getBlogById(@Param('id') id: string) {
         //const blogId = req.params.id
-        const foundId = await this.blogRepository.readBlogsId(id);
-        if (foundId) {
-            return foundId;
-        } else throw new NotFoundException('Blog with this id not found');
+        const foundId = await this.blogQueryRepository.readBlogsById(id);
+        if (!foundId) {
+            throw new NotFoundException('Blog with this id not found');
+        }
+        return foundId;
     }
 
     @Post() //Create Blog
@@ -68,8 +81,28 @@ export class BlogController {
         } else throw new NotFoundException('Blog with this id not found');
     }
 
+    @Put(':blogId/posts/:postId') //Update post for current blog
+    //@UseGuards(SoftBearerAuthGuard)
+    @HttpCode(204)
+    @UseGuards(BasicAuthGuard)
+    async updatePostForBlog(
+        @Param('blogId') blogId: string,
+        @Param('postId') postId: string,
+        @Request() req: Request,
+        @Body() postDto: UpdatePostForBlogDto,
+    ) {
+        const blog = await this.blogRepository.readBlogsId(blogId);
+        if (!blog) throw new NotFoundException('Blog with this id not found');
+        const postUpdate = await this.commandBus.execute(new UpdatePostCommand(postId, blogId, postDto));
+        console.log(postUpdate);
+        if (postUpdate) {
+            return postUpdate;
+        } else throw new NotFoundException('Post with this id not found');
+    }
+
     @Get(':blogId/posts') //Get Posts By Blog Id
-    @UseGuards(SoftBearerAuthGuard)
+    //@UseGuards(SoftBearerAuthGuard)
+    @UseGuards(BasicAuthGuard)
     async getPostByBlogId(
         @Param('blogId') blogId: string,
         @Request() req: Request,
@@ -78,23 +111,36 @@ export class BlogController {
     ) {
         const pagination = getQueryPagination(queryDto);
         const blog = await this.blogRepository.readBlogsId(blogId);
-        // if (!blog) throw new NotFoundException('Blog with this id not found');
-        // const arr = await this.blogQueryRepository.readPostsByBlogId(blogId, pagination, userId); //servis
-        // return arr;
+        if (!blog) throw new NotFoundException('Blog with this id not found');
+        const arr = await this.blogQueryRepository.readPostsByBlogId(blogId, pagination, userId); //servis
+        return arr;
     }
 
-    // @Post(':blogId/posts') //Create Post By Blog Id
-    // @HttpCode(201)
-    // @UseGuards(BasicAuthGuard)
-    // async createPostByBlogId(@Param('blogId') blogId: string, @Body() postDto: createPostByBlogIdDto) {
-    //     const post = await this.postService.createPost({ ...postDto, blogId });
-    //     if (!post) throw new NotFoundException('Blog with this id not found');
-    //     return post;
-    // }
-    //@Delete(':blogId/posts/:postId')
-    // async deletePostForSpecificBlog(@Param('blogId') blogId: string, @Param('postId') postId: string) {
-    //     const isDeleted = await deletePostForSpecificBlog(blogId, postId);
-    // }
+    @Post(':blogId/posts') //Create Post By Blog Id
+    @HttpCode(201)
+    @UseGuards(BasicAuthGuard)
+    async createPostByBlogId(
+        @Param('blogId', EnhancedParseUUIDPipe) blogId: string,
+        @Body() postDto: createPostByBlogIdDto,
+    ) {
+        const post = await this.postService.createPost({ ...postDto, blogId });
+        if (!post) throw new NotFoundException('Blog with this id not found');
+        return post;
+    }
+
+    @Delete(':blogId/posts/:postId') //Update post for current blog
+    //@UseGuards(SoftBearerAuthGuard)
+    @HttpCode(204)
+    @UseGuards(BasicAuthGuard)
+    async deletePostForBlog(@Param('blogId') blogId: string, @Param('postId') postId: string) {
+        const blog = await this.blogRepository.readBlogsId(blogId);
+        if (!blog) throw new NotFoundException('Blog with this id not found');
+        const isDeleted = await this.commandBus.execute(new DeletePostCommand(postId));
+        if (isDeleted) {
+            return isDeleted;
+        } else throw new NotFoundException('Blog with this id not found');
+    }
+
     @Delete(':id') //Delete Blog By Id
     @UseGuards(BasicAuthGuard)
     @HttpCode(204)
@@ -106,19 +152,3 @@ export class BlogController {
         } else throw new NotFoundException('Blog with this id not found');
     }
 }
-
-//const blogControllerInstance = new BlogController()
-
-// blogsRouter.get('/', blogControllerInstance.getBlogs)
-//
-// blogsRouter.get('/:id', blogControllerInstance.getBlogById)
-//
-// blogsRouter.post('/',authGuardMiddleware, ...validationCreateUpdateBlog, blogControllerInstance.createBlog)
-//
-// blogsRouter.put('/:id', authGuardMiddleware, ...validationCreateUpdateBlog, blogControllerInstance.updateBlog)
-//
-// blogsRouter.delete('/:id',  authGuardMiddleware, blogControllerInstance.deleteBlog)
-//
-// blogsRouter.get('/:id/posts', getUserMiddleware, blogControllerInstance.getPostByBlogId)
-//
-// blogsRouter.post('/:id/posts', authGuardMiddleware, ...validationCreatePostWithoutBlogId, blogControllerInstance.createPostByBlogId)
