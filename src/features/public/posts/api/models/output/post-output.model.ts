@@ -9,9 +9,10 @@ export type PostsQueryType = {
 };
 
 export type NewestLikeType = {
-    addedAt: string;
     userId: string;
-    login: string;
+    createdAt: string;
+    status: REACTIONS_ENUM;
+    postId: string;
 };
 
 export class PostViewType {

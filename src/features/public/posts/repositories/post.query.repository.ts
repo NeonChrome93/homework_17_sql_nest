@@ -44,13 +44,6 @@ export class PostsQueryRepository {
         };
     }
 
-    // async readPostId(postId: string): Promise<postDbType | null> {
-    //     const query = `SELECT * FROM public.posts
-    //                  WHERE id = $1`;
-    //     const post = await this.dataSource.query(query, [postId]);
-    //     return post[0];
-    // }
-
     async readPostId(postId: string, userId?: string | null): Promise<PostViewType | null> {
         const query = `SELECT * FROM public.posts
                     WHERE id = $1`;

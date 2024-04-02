@@ -1,5 +1,5 @@
 import { PostType, UpdatePostDto, UpdatePostForBlogDto } from '../api/models/input/post-input.model';
-import { PostViewType } from '../api/models/output/post-output.model';
+import { NewestLikeType, PostViewType } from '../api/models/output/post-output.model';
 import { REACTIONS_ENUM } from '../../comments/api/models/output/comments.output.models';
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
@@ -47,14 +47,30 @@ export class PostRepository {
         return true;
     }
 
-    async updatePostReaction(post: postDbType) {
-        // return this.PostModel.updateOne(
-        //     { _id: post._id },
-        //     {
-        //         $set: { ...post },
-        //     },
-        // );
-        return post.id;
+    async updatePostReaction(likes: NewestLikeType) {
+        const query = `UPDATE public.post_likes
+                     SET  "userId"=$1, "createdAt"=$2, status=$3
+                     WHERE "postId"=$4;`;
+
+        await this.dataSource.query(query, [likes.userId, likes.createdAt, likes.status, likes.postId]);
+        return this;
+    }
+
+    async createLikeByPost(likes: NewestLikeType) {
+        const query = `INSERT INTO public.post_likes( "userId", "createdAt", status, "postId")
+        VALUES ($1, $2, $3, $4)
+        returning *`;
+
+        return await this.dataSource.query(query, [likes.userId, likes.createdAt, likes.status, likes.postId]);
+    }
+
+    async readLikesPostId(postId: string, userId: string): Promise<postDbType | null> {
+        const query = `SELECT * FROM public.post_likes
+                     WHERE "postId" = $1 AND  "userId" = $2`;
+        const like = await this.dataSource.query(query, [postId, userId]);
+
+        if (!like) return null;
+        return like[0];
     }
 
     async deletePosts(postId: string): Promise<boolean> {
