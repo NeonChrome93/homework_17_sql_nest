@@ -11,9 +11,6 @@ export class BlogQueryRepository {
     constructor(private dataSource: DataSource) {}
 
     async readBlogs(pagination: QueryPaginationType): Promise<PaginationModels<BlogsViewType[]>> {
-        //
-        //     const filter: FilterQuery<BlogDbType> = {name: {$regex: pagination.searchNameTerm, $options: 'i'}}
-
         const queryFilter = `
 				select *
 					from public."blogs"
@@ -21,43 +18,6 @@ export class BlogQueryRepository {
 						order by "${pagination.sortBy}" ${pagination.sortDirection}
 					  limit ${pagination.pageSize} offset ${(pagination.pageNumber - 1) * pagination.pageSize}
 	`;
-
-        //
-        //     const blogs = await this.BlogModel
-        //         .find(filter, null, {lean: true})
-        //         .sort({[pagination.sortBy]: pagination.sortDirection})
-        //         .skip(pagination.skip)
-        //         .limit(pagination.pageSize)
-        //         .lean()
-        //         .exec()
-        //
-        //     const totalCount = await this.BlogModel.countDocuments(filter).exec()
-        //     const items: BlogsViewType[] = blogs.map((b) => ({
-        //         id: b._id.toString(),
-        //         name: b.name,
-        //         description: b.description,
-        //         websiteUrl: b.websiteUrl,
-        //         createdAt: b.createdAt.toISOString(),
-        //         isMembership: b.isMembership
-        //
-        //
-        //     }))
-        //     const pagesCount = Math.ceil(totalCount / pagination.pageSize);
-        //     return {
-        //         pagesCount: pagesCount === 0 ? 1 : pagesCount,
-        //         page: pagination.pageNumber,
-        //         pageSize: pagination.pageSize,
-        //         totalCount: totalCount,
-        //         items
-        //     }
-        // }
-        //
-        // async readBlogsId(id: string): Promise<BlogsViewType | null> {
-        //     const blog  = await this.BlogModel.findOne({_id: new ObjectId(id)}).exec()//logic
-        //
-        //     if (!blog) {
-        //         return null;
-        //     }
 
         const findAllBlogs = await this.dataSource.query(queryFilter);
 
@@ -94,14 +54,8 @@ export class BlogQueryRepository {
     async readPostsByBlogId(
         blogId: string,
         pagination: QueryPaginationType,
-        userId?: string | null,
+        //userId?: string | null,
     ): Promise<PaginationModels<PostViewType[]>> {
-        // const filter: FilterQuery<PostType> = { blogId };
-        // const posts = await this.PostModel.find(filter)
-        //     .sort({ [pagination.sortBy]: pagination.sortDirection })
-        //     .skip(pagination.skip)
-        //     .limit(pagination.pageSize)
-        //     .exec();
         const queryFilter = `
 				SELECT * FROM public.posts
 					WHERE "blogId" = $1 

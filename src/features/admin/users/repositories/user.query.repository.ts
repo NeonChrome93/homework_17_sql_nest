@@ -8,37 +8,6 @@ import { User } from '../domain/db-model';
 export class UsersQueryRepository {
     constructor(private dataSource: DataSource) {}
 
-    //= async getUsers(pagination: QueryUserPaginationType): Promise<PaginationModels<UserViewModel[]>> {
-    //     const filter = {
-    //         $or: [
-    //             { login: { $regex: pagination.searchLoginTerm, $options: 'i' } },
-    //             { email: { $regex: pagination.searchEmailTerm, $options: 'i' } },
-    //         ],
-    //     };
-    //
-    //     const users = await this.UserModel.find(filter)
-    //         .sort({ [pagination.sortBy]: pagination.sortDirection })
-    //         .skip(pagination.skip)
-    //         .limit(pagination.pageSize)
-    //         .exec();
-    //
-    //     const totalCount = await this.UserModel.countDocuments(filter).exec();
-    //     const items = users.map(u => ({
-    //         id: u._id.toString(),
-    //         login: u.login,
-    //         email: u.email,
-    //         createdAt: u.createdAt.toISOString(),
-    //     }));
-    //     const pagesCount = Math.ceil(totalCount / pagination.pageSize);
-    //     return {
-    //         pagesCount: pagesCount === 0 ? 1 : pagesCount,
-    //         page: pagination.pageNumber,
-    //         pageSize: pagination.pageSize,
-    //         totalCount,
-    //         items,
-    //     };
-    // }
-
     async getUsers(
         sortBy: string,
         sortDirection: string,
@@ -47,10 +16,6 @@ export class UsersQueryRepository {
         searchLoginTerm: string,
         searchEmailTerm: string,
     ): Promise<PaginationModels<UserViewModel[]>> {
-        // if (sortBy === 'login') {
-        //     sortBy = 'userName';
-        // }
-        console.log(pageNumber, pageSize);
         const queryFilter = `
 				select *
 					from public."users"
