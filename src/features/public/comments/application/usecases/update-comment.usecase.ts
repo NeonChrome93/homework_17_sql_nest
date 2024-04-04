@@ -10,16 +10,16 @@ export class UpdateCommentCommand {
     ) {}
 }
 
-// @CommandHandler(UpdateCommentCommand)
-// export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentCommand> {
-//     constructor(
-//         private readonly commentsQueryRepository: CommentsQueryRepository,
-//         private readonly commentRepository: CommentRepository,
-//     ) {}
+@CommandHandler(UpdateCommentCommand)
+export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentCommand> {
+    constructor(
+        private readonly commentsQueryRepository: CommentsQueryRepository,
+        private readonly commentRepository: CommentRepository,
+    ) {}
 
-// async execute(command: UpdateCommentCommand): Promise<boolean> {
-//     const comment = await this.commentsQueryRepository.readCommentId(command.commentId);
-//     if (!comment) return false;
-//     return this.commentRepository.updateComment(command.commentId, command.newUpdateRequest);
-// }
-//}
+    async execute(command: UpdateCommentCommand): Promise<boolean> {
+        const comment = await this.commentsQueryRepository.readCommentId(command.commentId);
+        if (!comment) return false;
+        return this.commentRepository.updateComment(command.commentId, command.newUpdateRequest);
+    }
+}

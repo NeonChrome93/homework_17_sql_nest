@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { CommentsDBType } from '../domain/comment.entity';
+import { UpdateCommentDto } from '../api/models/input/comment.input.model';
 
 @Injectable()
 export class CommentRepository {
@@ -17,16 +18,17 @@ export class CommentRepository {
         return true;
     }
     //
-    // async updateComment(commentId: string, newUpdateRequest: UpdateCommentDto): Promise<boolean> {
-    //     const res = await this.CommentModel.updateOne(
-    //         { _id: new ObjectId(commentId) },
-    //         {
-    //             $set: { content: newUpdateRequest.content },
-    //         },
-    //     ).exec();
-    //
-    //     return res.matchedCount === 1;
-    // }
+    async updateComment(commentId: string, newUpdateRequest: UpdateCommentDto): Promise<boolean> {
+        // const res = await this.CommentModel.updateOne(
+        //     { _id: new ObjectId(commentId) },
+        //     {
+        //         $set: { content: newUpdateRequest.content },
+        //     },
+        // ).exec();
+        //
+        // return res.matchedCount === 1;
+        return true;
+    }
     //
     // async deleteComment(commentId: string): Promise<boolean> {
     //     try {

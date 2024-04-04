@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { QueryPaginationType } from '../../../../utils/pagination';
 import { DataSource } from 'typeorm';
+import { CommentsViewType } from '../api/models/output/comments.output.models';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -41,26 +42,27 @@ export class CommentsQueryRepository {
         return postId;
     }
 
-    // async readCommentId(id: string, userId?: string | null): Promise<CommentsViewType | null> {
-    //     const comment: CommentsDBType | null = await this.CommentModel.findOne({ _id: new ObjectId(id) });
-    //
-    //     if (!comment) {
-    //         return null;
-    //     }
-    //     return {
-    //         id: comment._id.toString(),
-    //         content: comment.content,
-    //         commentatorInfo: comment.commentatorInfo,
-    //         createdAt: comment.createdAt.toISOString(),
-    //         likesInfo: {
-    //             likesCount: comment.reactions.filter(r => r.status === REACTIONS_ENUM.Like).length,
-    //             dislikesCount: comment.reactions.filter(r => r.status === REACTIONS_ENUM.Dislike).length,
-    //             myStatus: userId
-    //                 ? comment.reactions.filter(r => r.userId === userId).length
-    //                     ? comment.reactions.filter(r => r.userId === userId)[0].status
-    //                     : REACTIONS_ENUM.None
-    //                 : REACTIONS_ENUM.None,
-    //         },
-    //     };
-    // }
+    async readCommentId(id: string, userId?: string | null): Promise</*<CommentsViewType*/ null> {
+        //const comment: CommentsDBType | null = await this.CommentModel.findOne({ _id: new ObjectId(id) });
+
+        // if (!comment) {
+        //     return null;
+        // }
+        // return {
+        //     id: comment._id.toString(),
+        //     content: comment.content,
+        //     commentatorInfo: comment.commentatorInfo,
+        //     createdAt: comment.createdAt.toISOString(),
+        //     likesInfo: {
+        //         likesCount: comment.reactions.filter(r => r.status === REACTIONS_ENUM.Like).length,
+        //         dislikesCount: comment.reactions.filter(r => r.status === REACTIONS_ENUM.Dislike).length,
+        //         myStatus: userId
+        //             ? comment.reactions.filter(r => r.userId === userId).length
+        //                 ? comment.reactions.filter(r => r.userId === userId)[0].status
+        //                 : REACTIONS_ENUM.None
+        //             : REACTIONS_ENUM.None,
+        //     },
+        // };
+        return null;
+    }
 }
