@@ -48,20 +48,22 @@ export class CommentsQueryRepository {
     SELECT 
         c.id AS comment_id,
         c.content AS content,
-        c.userId AS commentator_id,
-        a.userLogin AS user_login,
-        c.createdAt AS created_at
-    FROM comments c
-    JOIN accounts a ON c.userId = a.id
+        c."userId" AS commentator_id,
+        u."login" AS user_login,
+        c."createdAt" AS created_at
+    FROM comments c    
+    LEFT JOIN users u 
+    ON c."userId" = u.id
+    WHERE c.id = $1
     ),
     likes_info AS (
     SELECT 
         c.id AS comment_id,
         COUNT(CASE WHEN l.status = 'Like' THEN 1 END) AS likes_count,
         COUNT(CASE WHEN l.status = 'Dislike' THEN 1 END) AS dislikes_count,
-        SUM(CASE WHEN l.userId = 'myUserId' THEN 1 ELSE 0 END) AS my_status
+\t\t COALESCE((SELECT l2.status FROM comments_likes l2 WHERE l2."commentId" = c.id AND l2."userId" = $2 LIMIT 1), 'None') AS myStatus
     FROM comments c
-    LEFT JOIN likes l ON c.id = l.commentId
+    LEFT JOIN comments_likes l ON c.id = l."commentId"
     GROUP BY c.id
     )
     SELECT 
@@ -69,11 +71,12 @@ export class CommentsQueryRepository {
         c.content AS content,
         json_build_object('userId', c.commentator_id, 'userLogin', c.user_login) AS commentatorInfo,
         c.created_at AS createdAt,
-        json_build_object('likesCount', COALESCE(l.likes_count, 0), 'dislikesCount', COALESCE(l.dislikes_count, 0), 'myStatus', CASE WHEN l.my_status > 0 THEN 'Like' ELSE 'None' END) AS likesInfo
+        json_build_object('likesCount', COALESCE(l.likes_count, 0), 'dislikesCount', COALESCE(l.dislikes_count, 0), 'myStatus', COALESCE(l.myStatus, 'None')) AS likesInfo
         FROM comment_info c
         LEFT JOIN likes_info l ON c.comment_id = l.comment_id;`;
 
-        const view = await this.dataSource.query(query);
+        const view = await this.dataSource.query(query, [id, userId]);
+        console.log(view);
         return view[0];
     }
 }
