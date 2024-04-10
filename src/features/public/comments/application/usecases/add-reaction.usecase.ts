@@ -1,6 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { REACTIONS_ENUM } from '../../api/models/output/comments.output.models';
 import { CommentRepository } from '../../repositories/comment.repository';
+import { CommentsQueryRepository } from '../../repositories/comment.query.repository';
 
 export class AddReactionCommand {
     constructor(
@@ -10,23 +11,35 @@ export class AddReactionCommand {
     ) {}
 }
 
-// @CommandHandler(AddReactionCommand)
-// export class AddReactionUseCase implements ICommandHandler<AddReactionCommand> {
-//     constructor(private readonly commentRepository: CommentRepository) {}
+@CommandHandler(AddReactionCommand)
+export class AddReactionUseCase implements ICommandHandler<AddReactionCommand> {
+    constructor(
+        private readonly commentRepository: CommentRepository,
+        private readonly commentQueryRepository: CommentsQueryRepository,
+    ) {}
 
-// async execute(command: AddReactionCommand): Promise<boolean> {
-//     const comment = await this.commentRepository.readCommentIdDbType(command.commentId);
-//     if (!comment) return false;
-//     const reaction = comment.reactions.find(r => r.userId === command.userId);
-//     if (!reaction) {
-//         comment.reactions.push({ userId: command.userId, status: command.status, createdAt: new Date() });
-//     } else {
-//         reaction.status = command.status;
-//         reaction.createdAt = new Date();
-//         //const newArray=  comment.reactions.map((r) => r.userId === reaction.userId ? {...r, ...reaction} : r)
-//         comment.reactions = comment.reactions.map(r => (r.userId === reaction.userId ? { ...r, ...reaction } : r));
-//     }
-//     await this.commentRepository.updateCommentReactions(comment);
-//     return true;
-// }
-//}
+    async execute(command: AddReactionCommand): Promise<boolean> {
+        const comment = await this.commentQueryRepository.readCommentId(command.commentId);
+        if (!comment) return false;
+
+        const reaction = await this.commentRepository.readLikesCommentId(command.commentId, command.userId);
+        console.log(reaction);
+        if (!reaction) {
+            await this.commentRepository.createLikeByComment({
+                userId: command.userId.toString(),
+                status: command.status,
+                createdAt: new Date().toISOString(),
+                commentId: command.commentId.toString(),
+            });
+        } else {
+            await this.commentRepository.updateCommentReactions({
+                userId: command.userId.toString(),
+                status: command.status,
+                createdAt: new Date().toISOString(),
+                commentId: command.commentId.toString(),
+            });
+        }
+
+        return true;
+    }
+}

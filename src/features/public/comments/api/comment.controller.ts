@@ -45,10 +45,8 @@ export class CommentController {
         @Body() dto: updateLikeDto,
         @UserId() userId: string,
     ) {
-        // console.log(status, "likestatus")
-        // console.log(await CommentModel.findOne({_id: new ObjectId(comment)}))
         const addLikes = await this.commandBus.execute(new AddReactionCommand(commentId, userId, dto.likeStatus));
-        // console.log(await CommentModel.findOne({_id: new ObjectId(comment)}))
+
         if (addLikes) {
             return addLikes;
         } else throw new NotFoundException('Comment with id not found');

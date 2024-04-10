@@ -50,6 +50,10 @@ import { DeletePostUseCase } from './features/public/posts/application/usecases/
 import { CreateCommentUseCase } from './features/public/comments/application/usecases/create-comment.usecase';
 import { CommentRepository } from './features/public/comments/repositories/comment.repository';
 import { CommentsQueryRepository } from './features/public/comments/repositories/comment.query.repository';
+import { CommentController } from './features/public/comments/api/comment.controller';
+import { UpdateCommentUseCase } from './features/public/comments/application/usecases/update-comment.usecase';
+import { AddReactionUseCase } from './features/public/comments/application/usecases/add-reaction.usecase';
+import { DeleteCommentUseCase } from './features/public/comments/application/usecases/delete-comment.usecase';
 
 const adapters = [JwtAdapter, EmailAdapter];
 const constraints = [
@@ -82,9 +86,9 @@ const useCases = [
     CreateDeviceUseCase,
     DeleteDeviceUseCase,
     CreateCommentUseCase,
-    // UpdateCommentUseCase,
-    // AddReactionUseCase,
-    // DeleteCommentUseCase,
+    UpdateCommentUseCase,
+    AddReactionUseCase,
+    DeleteCommentUseCase,
     RegistrationUserUseCase,
     ConfirmEmailUseCase,
     ResendingCodeUseCase,
@@ -127,6 +131,7 @@ const useCases = [
         BlogSaController,
         BlogController,
         PostController,
+        CommentController,
     ],
     providers: [
         AppService,
