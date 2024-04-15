@@ -19,7 +19,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { DeletePostCommand } from '../application/usecases/delete-post.usecase';
 import { AddLikesByPostCommand } from '../application/usecases/add-likes-by-post.usecase';
 import { PostsQueryType } from './models/output/post-output.model';
-import { createPostDto, likesDto, UpdatePostDto } from './models/input/post-input.model';
+import { createPostDto, likesDto } from './models/input/post-input.model';
 import { BearerAuthGuard, SoftBearerAuthGuard } from '../../../../infrastructure/guards/user.guard';
 import { UserAll, UserId } from '../../../../infrastructure/decorators/get-user.decorator';
 import { getQueryPagination } from '../../../../utils/pagination';
@@ -28,8 +28,6 @@ import { CommentsQueryRepository } from '../../comments/repositories/comment.que
 import { UpdateCommentDto } from '../../comments/api/models/input/comment.input.model';
 import { User } from '../../../admin/users/domain/db-model';
 import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
-import { EnhancedParseUUIDPipe } from '../../../../infrastructure/exceptions/parse_UUID.pipe.';
-import e from 'express';
 
 @Controller('posts')
 export class PostController {
@@ -42,15 +40,15 @@ export class PostController {
     ) {}
 
     @Get() //Return All Posts
-    //@UseGuards(SoftBearerAuthGuard)
+    @UseGuards(SoftBearerAuthGuard)
     async getPosts(@Query() queryDto: PostsQueryType, @UserId() userId: string | null) {
         const pagination = getQueryPagination(queryDto);
-        const arr = await this.postsQueryRepository.readPosts(pagination, userId);
-        return arr;
+        const posts = await this.postsQueryRepository.readPosts(pagination, userId);
+        return posts;
     }
 
     @Get(':id') //Return Post By id
-    //@UseGuards(SoftBearerAuthGuard)
+    @UseGuards(SoftBearerAuthGuard)
     async getPostById(@Param('id') postId: string, @UserId() userId: string | null) {
         const post = await this.postsQueryRepository.readPostId(postId, userId);
         if (!post) {

@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { CommentsDBType } from '../domain/comment.entity';
-import { UpdateCommentDto } from '../api/models/input/comment.input.model';
-import { postDbType } from '../../posts/domain/post.entity';
-import { likeTypeComment } from '../../posts/api/models/output/post-output.model';
+import { likeTypeComment, UpdateCommentDto } from '../api/models/input/comment.input.model';
 
 @Injectable()
 export class CommentRepository {
@@ -38,16 +36,15 @@ export class CommentRepository {
                         SET "content"  = $1
                         WHERE id = $2`;
 
-        const updated = await this.dataSource.query(query, [newUpdateRequest, commentId]);
-        if (!updated) return true;
-        return false;
+        const updated = await this.dataSource.query(query, [newUpdateRequest.content, commentId]);
+        if (!updated) return false;
+        return true;
     }
 
     async readLikesCommentId(commentId: string, userId: string): Promise<likeTypeComment | null> {
         const query = `SELECT * FROM public.comments_likes
                      WHERE "commentId" = $1 AND  "userId" = $2`;
         const like = await this.dataSource.query(query, [commentId, userId]);
-        console.log(like);
         if (!like) return null;
         return like[0];
     }

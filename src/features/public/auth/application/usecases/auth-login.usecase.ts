@@ -22,7 +22,6 @@ export class AuthLoginUseCase implements ICommandHandler<AuthLoginCommand> {
     //вход в систему, пользователь логинится получает токены
     async execute(command: AuthLoginCommand): Promise<{ accessToken: string; refreshToken: string } | null> {
         //const user = await this.userService.checkCredentials(loginOrEmail, password)
-        console.log('service', command.user);
         // if (!user) return null
         const accessToken = this.jwtService.createJWT(command.user);
         const deviceId = randomUUID();

@@ -7,6 +7,8 @@ import { UpdateCommentDto, updateLikeDto } from './models/input/comment.input.mo
 import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
 import { AddReactionCommand } from '../application/usecases/add-reaction.usecase';
 import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
+import { EnhancedParseUUIDPipe } from '../../../../infrastructure/exceptions/parse_UUID.pipe.';
+import { CommentOwnerGuard } from '../../../../infrastructure/guards/comment-owner.guard';
 
 @Controller('comments')
 export class CommentController {
@@ -26,11 +28,12 @@ export class CommentController {
 
     @Put(':commentId')
     @HttpCode(204)
-    //@UseGuards(CommentOwnerGuard)
+    @UseGuards(CommentOwnerGuard)
     @UseGuards(BearerAuthGuard)
-    async updateCommentById(@Param('commentId') commentId: string, @Body() commentDto: UpdateCommentDto) {
-        console.log(22222);
-
+    async updateCommentById(
+        @Param('commentId', EnhancedParseUUIDPipe) commentId: string,
+        @Body() commentDto: UpdateCommentDto,
+    ) {
         const foundId = await this.commandBus.execute(new UpdateCommentCommand(commentId, commentDto));
         if (!foundId) {
             throw new NotFoundException('Comment with id not found');
@@ -55,7 +58,7 @@ export class CommentController {
     //1) добавить лайк в сервисе 2)добавить сохранение в БД  обновленной БД модели 3) получение по статусу
     @Delete(':commentId')
     @HttpCode(204)
-    //@UseGuards(CommentOwnerGuard)
+    @UseGuards(CommentOwnerGuard)
     @UseGuards(BearerAuthGuard)
     async deleteCommentById(@Param('commentId') commentId: string) {
         const isDeleted = await this.commandBus.execute(new DeleteCommentCommand(commentId));

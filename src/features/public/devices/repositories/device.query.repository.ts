@@ -27,7 +27,7 @@ export class DevicesQueryRepository {
             public.devices
             WHERE "deviceId" = $1
             `;
-        console.log('deviceId', deviceId);
+
         const getDevices = await this.dataSource.query(query, [deviceId]);
         console.log('getDevices', getDevices);
         return getDevices[0] || null;

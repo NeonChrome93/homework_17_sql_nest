@@ -19,12 +19,12 @@ export class AddLikesByPostUseCase implements ICommandHandler<AddLikesByPostComm
     ) {}
 
     async execute(command: AddLikesByPostCommand): Promise<boolean> {
+        console.log('commandDDDD', command);
         const post = await this.postRepository.readPostId(command.postId);
-        //const user = await this.usersRepository.readUserById(command.userId.toString()); //login: user!.login
-
         if (!post) return false;
-        const reactions = await this.postRepository.readLikesPostId(command.postId, command.userId);
 
+        const reactions = await this.postRepository.readLikesPostId(command.postId, command.userId);
+        console.log({ reactions });
         if (!reactions) {
             await this.postRepository.createLikeByPost({
                 userId: command.userId.toString(),

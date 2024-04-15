@@ -8,7 +8,7 @@ export type PostsQueryType = {
     searchNameTerm: string | null;
 };
 
-export type NewestLikeType = {
+export type likeTypePost = {
     userId: string;
     createdAt: string;
     status: REACTIONS_ENUM;

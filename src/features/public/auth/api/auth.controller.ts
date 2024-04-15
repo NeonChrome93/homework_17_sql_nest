@@ -12,12 +12,11 @@ import {
     UseGuards,
     Headers,
 } from '@nestjs/common';
-import e, { Response } from 'express';
+import { Response } from 'express';
 import { Request } from 'express';
 import { AuthService } from '../application/auth.service';
 import { JwtAdapter } from '../adapters/jwt.adapter';
 import { AuthSessionTokenGuard } from '../../../../infrastructure/guards/auth-session-token.guard';
-import { ThrottlerGuard } from '@nestjs/throttler';
 import { DeviceId } from '../../../../infrastructure/decorators/get-device.decorator';
 import { LocalAuthGuard } from '../../../../infrastructure/guards/auth-local.guard';
 import { UserCreateModelDto } from '../../../admin/users/api/models/input/user.input.model';
@@ -50,7 +49,6 @@ export class AuthController {
     @Get('/me')
     @UseGuards(BearerAuthGuard)
     async getUserCredentials(@UserAll() user: User) {
-        console.log(user);
         return {
             email: user.email,
             login: user.login,
@@ -70,8 +68,6 @@ export class AuthController {
     ) {
         // const {loginOrEmail, password} = req.body
 
-        console.log(title);
-        console.log('User', user);
         const result = await this.commandBus.execute(new AuthLoginCommand(ip, title || 'x', user)); // alt+ enter
         if (!result) return res.sendStatus(401);
         res.cookie('refreshToken', result.refreshToken, {
@@ -85,9 +81,7 @@ export class AuthController {
     @Post('/refresh-token')
     @UseGuards(AuthSessionTokenGuard)
     async refreshToken(@Res() res: Response, @Req() req: Request, @UserAll() user: User) {
-        console.log('in refresh');
         const refreshToken = req.cookies.refreshToken;
-        console.log(refreshToken);
 
         const result = await this.authService.refresh(user, refreshToken);
         if (!result) return res.sendStatus(401);

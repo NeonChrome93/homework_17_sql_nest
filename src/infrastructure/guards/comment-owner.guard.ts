@@ -28,9 +28,9 @@ export class CommentOwnerGuard implements CanActivate {
 
         const token = request.headers.authorization.split(' ')[1];
         const userId = await this.jwtService.getUserIdByToken(token);
-        console.log(request.params, 'param');
+        //console.log(request.params, 'param');
         const commentBeforeDelete = await this.commentsQueryRepository.readCommentId(request.params.commentId);
-        console.log(commentBeforeDelete, 'commentBeforeDelete');
+        // console.log(commentBeforeDelete, 'commentBeforeDelete');
         if (!commentBeforeDelete) {
             throw new NotFoundException();
         }

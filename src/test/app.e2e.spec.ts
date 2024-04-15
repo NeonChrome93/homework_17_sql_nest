@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { AppModule } from './../src/app.module';
-import request from 'supertest';
+import { AppModule } from '../app.module';
+import { agent as request } from 'supertest';
 
 describe('AppController (e2e)', () => {
     let app: INestApplication;
@@ -16,6 +16,7 @@ describe('AppController (e2e)', () => {
     });
 
     it('/ (GET)', async () => {
+        // eslint-disable-next-line no-use-before-define
         await request(app.getHttpServer()).get('/').expect(200);
     });
 });

@@ -17,7 +17,6 @@ export class ResendingCodeUseCase implements ICommandHandler<ResendingCodeComman
     //переотправка кода
     async execute(command: ResendingCodeCommand): Promise<boolean> {
         const user = await this.usersRepository.readUserByEmail(command.email);
-        console.log('Userrrr', user);
         if (!user) return false;
         const newCode = randomUUID();
         await this.usersRepository.updateConfirmationCode(user.id, newCode);

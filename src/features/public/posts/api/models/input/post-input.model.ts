@@ -1,7 +1,7 @@
 import { IsEnum, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { Trim } from '../../../../../../infrastructure/validation/custom';
 import { REACTIONS_ENUM } from '../../../../comments/api/models/output/comments.output.models';
-import { NewestLikeType, PostViewType } from '../output/post-output.model';
+import { PostViewType } from '../output/post-output.model';
 
 export class createPostDto {
     @MaxLength(30)

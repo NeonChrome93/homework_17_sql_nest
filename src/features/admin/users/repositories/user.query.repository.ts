@@ -26,7 +26,6 @@ export class UsersQueryRepository {
 
         const findAllUsers = await this.dataSource.query(queryFilter);
 
-        // console.log(findAllUsers);
         const countTotalCount = `
 		    SELECT count(id)
 			  from "users"

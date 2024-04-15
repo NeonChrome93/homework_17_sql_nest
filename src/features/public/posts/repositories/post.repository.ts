@@ -1,6 +1,5 @@
-import { PostType, UpdatePostDto, UpdatePostForBlogDto } from '../api/models/input/post-input.model';
-import { NewestLikeType, PostViewType } from '../api/models/output/post-output.model';
-import { REACTIONS_ENUM } from '../../comments/api/models/output/comments.output.models';
+import { PostType, UpdatePostForBlogDto } from '../api/models/input/post-input.model';
+import { likeTypePost, PostViewType } from '../api/models/output/post-output.model';
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { postDbType } from '../domain/post.entity';
@@ -47,16 +46,15 @@ export class PostRepository {
         return true;
     }
 
-    async updatePostReaction(likes: NewestLikeType) {
+    async updatePostReaction(likes: likeTypePost) {
         const query = `UPDATE public.post_likes
                      SET  "userId"=$1, "createdAt"=$2, status=$3
                      WHERE "postId"=$4;`;
 
-        await this.dataSource.query(query, [likes.userId, likes.createdAt, likes.status, likes.postId]);
-        return this;
+        return await this.dataSource.query(query, [likes.userId, likes.createdAt, likes.status, likes.postId]);
     }
 
-    async createLikeByPost(likes: NewestLikeType) {
+    async createLikeByPost(likes: likeTypePost) {
         const query = `INSERT INTO public.post_likes( "userId", "createdAt", status, "postId")
         VALUES ($1, $2, $3, $4)
         returning *`;

@@ -25,7 +25,7 @@ export class UserRepository {
                 newUser.isConfirmed,
             ],
         );
-        console.log(userId);
+
         return userId[0].id;
     }
 
@@ -131,7 +131,6 @@ export class UserRepository {
                        SET  "confirmationCode"= $1
                        WHERE id = $2`;
         const result = await this.dataSource.query(query, [newCode, id]);
-        console.log(id, newCode);
         if (!result) return false;
         return true;
     }

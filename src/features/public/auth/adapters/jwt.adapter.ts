@@ -7,7 +7,7 @@ export class JwtAdapter {
     // constructor(private readonly jwtService: JwtService)
 
     createJWT(user: User) {
-        console.log(process.env.ACCESS_TIME);
+        //console.log(process.env.ACCESS_TIME);
         //TODO: 10s
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || '123', {
             expiresIn: process.env.ACCESS_TIME || '5m',

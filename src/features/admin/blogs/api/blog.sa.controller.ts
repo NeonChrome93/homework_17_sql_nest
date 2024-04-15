@@ -6,7 +6,6 @@ import {
     HttpCode,
     NotFoundException,
     Param,
-    ParseUUIDPipe,
     Post,
     Put,
     Query,
@@ -25,11 +24,7 @@ import { BasicAuthGuard } from '../../../../infrastructure/guards/basic-auth.gua
 import { SoftBearerAuthGuard } from '../../../../infrastructure/guards/user.guard';
 import { UserId } from '../../../../infrastructure/decorators/get-user.decorator';
 import { BlogQueryRepository } from '../repositories/blog.query.repository';
-import {
-    createPostByBlogIdDto,
-    UpdatePostDto,
-    UpdatePostForBlogDto,
-} from '../../../public/posts/api/models/input/post-input.model';
+import { createPostByBlogIdDto, UpdatePostForBlogDto } from '../../../public/posts/api/models/input/post-input.model';
 import { PostService } from '../../../public/posts/application/post.service';
 import { EnhancedParseUUIDPipe } from '../../../../infrastructure/exceptions/parse_UUID.pipe.';
 import { UpdatePostCommand } from '../../../public/posts/application/usecases/update-post.usecase';
@@ -48,8 +43,8 @@ export class BlogSaController {
     @UseGuards(BasicAuthGuard)
     async getBlogs(@Query() queryDto: BlogsQueryType) {
         const pagination = getQueryPagination(queryDto);
-        const arr = await this.blogQueryRepository.readBlogs(pagination);
-        return arr;
+        const view = await this.blogQueryRepository.readBlogs(pagination);
+        return view;
     }
 
     @Get(':id') //Get Blog Id
@@ -82,7 +77,7 @@ export class BlogSaController {
     }
 
     @Put(':blogId/posts/:postId') //Update post for current blog
-    //@UseGuards(SoftBearerAuthGuard)
+    @UseGuards(SoftBearerAuthGuard)
     @HttpCode(204)
     @UseGuards(BasicAuthGuard)
     async updatePostForBlog(
@@ -94,14 +89,14 @@ export class BlogSaController {
         const blog = await this.blogRepository.readBlogsId(blogId);
         if (!blog) throw new NotFoundException('Blog with this id not found');
         const postUpdate = await this.commandBus.execute(new UpdatePostCommand(postId, blogId, postDto));
-        console.log(postUpdate);
+        //console.log(postUpdate);
         if (postUpdate) {
             return postUpdate;
         } else throw new NotFoundException('Post with this id not found');
     }
 
     @Get(':blogId/posts') //Get Posts By Blog Id
-    //@UseGuards(SoftBearerAuthGuard)
+    @UseGuards(SoftBearerAuthGuard)
     @UseGuards(BasicAuthGuard)
     async getPostByBlogId(
         @Param('blogId') blogId: string,
@@ -112,8 +107,8 @@ export class BlogSaController {
         const pagination = getQueryPagination(queryDto);
         const blog = await this.blogRepository.readBlogsId(blogId);
         if (!blog) throw new NotFoundException('Blog with this id not found');
-        const arr = await this.blogQueryRepository.readPostsByBlogId(blogId, pagination, userId); //servis
-        return arr;
+        const view = await this.blogQueryRepository.readPostsByBlogId(blogId, pagination, userId); //servis
+        return view;
     }
 
     @Post(':blogId/posts') //Create Post By Blog Id
@@ -129,7 +124,6 @@ export class BlogSaController {
     }
 
     @Delete(':blogId/posts/:postId') //Update post for current blog
-    //@UseGuards(SoftBearerAuthGuard)
     @HttpCode(204)
     @UseGuards(BasicAuthGuard)
     async deletePostForBlog(@Param('blogId') blogId: string, @Param('postId') postId: string) {
@@ -145,7 +139,6 @@ export class BlogSaController {
     @UseGuards(BasicAuthGuard)
     @HttpCode(204)
     async deleteBlog(@Param('id') id: string) {
-        console.log(id);
         const isDeleted = await this.commandBus.execute(new DeleteBlogCommand(id));
         if (isDeleted) {
             return isDeleted;

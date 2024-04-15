@@ -11,6 +11,13 @@ export class UpdateCommentDto {
     content: string;
 }
 
+export type likeTypeComment = {
+    userId: string;
+    createdAt: string;
+    status: REACTIONS_ENUM;
+    commentId: string;
+};
+
 export class updateLikeDto {
     @IsIn(Object.values(REACTIONS_ENUM))
     likeStatus: REACTIONS_ENUM;

@@ -44,10 +44,10 @@ export class SoftBearerAuthGuard implements CanActivate {
 
         const token = request.headers.authorization.split(' ')[1];
         const userId = this.jwtService.getUserIdByToken(token);
-        console.log(userId);
+        //console.log(userId);
 
         if (userId) {
-            const user = await this.userService.findUserById(userId.toString()).then(user => {
+            await this.userService.findUserById(userId.toString()).then(user => {
                 request.user = user ? user : null;
             });
             return true;
