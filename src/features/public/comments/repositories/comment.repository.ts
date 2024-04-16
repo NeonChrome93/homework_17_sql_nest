@@ -7,11 +7,6 @@ import { likeTypeComment, UpdateCommentDto } from '../api/models/input/comment.i
 export class CommentRepository {
     constructor(private dataSource: DataSource) {}
 
-    // async readCommentIdDbType(id: string): Promise<Comments | null> {
-    //     if (!ObjectId.isValid(id)) return null;
-    //     return this.CommentModel.findOne({ _id: new ObjectId(id) }).lean();
-    // }
-    //
     async createComment(newComment: CommentsDBType): Promise<boolean> {
         const comment = await this.dataSource.query(
             `INSERT INTO public.comments( "postId", content, "userId", "createdAt")

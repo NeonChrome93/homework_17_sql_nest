@@ -7,7 +7,6 @@ import { Device } from '../domain/device.entity';
 export class DevicesQueryRepository {
     constructor(private dataSource: DataSource) {}
     async findAllUserDevices(userId: string): Promise<DeviceViewModel[]> {
-        // const device = await this.DeviceModel.find({ userId }, { _id: 0, userId: 0, __v: 0 }).lean();
         const query = `
             SELECT * FROM 
             public.devices

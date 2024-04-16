@@ -4,8 +4,6 @@ import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Blog, BlogDbType } from '../domain/blog.entity';
 
-//todo also update blogName in posts
-// updateBlog(updateBlogDto){
 @Injectable()
 export class BlogRepository {
     constructor(private dataSource: DataSource) {}

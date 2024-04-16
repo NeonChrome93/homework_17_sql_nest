@@ -96,19 +96,6 @@ LIMIT ${pagination.pageSize} offset ${(pagination.pageNumber - 1) * pagination.p
     }
 
     async readPostId(postId: string, userId?: string | null): Promise<PostViewType | null> {
-        //     const query = `SELECT * FROM public.posts
-        //                 WHERE id = $1`;
-        //
-        //     try {
-        //         console.log(postId);
-        //         const post: postDbType[] = await this.dataSource.query(query, [postId]);
-        //
-        //         return new PostMapperImp().mapPostDbToPostView(post[0]);
-        //     } catch (error) {
-        //         console.log(error);
-        //         return null; // Возвращаем null в случае любых ошибок
-        //     }
-        // }
         const query = `WITH post_likes_view AS (
     SELECT
         "postId",
